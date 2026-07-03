@@ -18,6 +18,16 @@
         button { width: 100%; padding: 14px; background: #0052cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { background: #003d99; }
         
+        /* 🔴 NEW LIVE SEARCH CSS 🔴 */
+        .autocomplete-container { position: relative; width: 100%; }
+        .autocomplete-items {
+            position: absolute; border: 1px solid #d1d5db; border-top: none; z-index: 99;
+            top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;
+        }
+        .autocomplete-items div { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #333; }
+        .autocomplete-items div:hover { background-color: #f8fafc; color: #0052cc; font-weight: bold; }
+
         .details-card { margin-top: 25px; padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; display: none; }
         .details-card h3 { margin: 0 0 15px 0; color: #1e293b; text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
         .data-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #475569; }
@@ -38,8 +48,11 @@
     <div class="content">
         <div class="input-group">
             <label>Search by Name:</label>
-            <input type="text" id="searchName" list="workerNames" placeholder="Start typing a name..." autocomplete="off">
-            <datalist id="workerNames"></datalist>
+            <!-- 🔴 NEW LIVE SEARCH HTML 🔴 -->
+            <div class="autocomplete-container">
+                <input type="text" id="searchName" placeholder="Start typing a name..." autocomplete="off">
+                <div id="searchNameList" class="autocomplete-items"></div>
+            </div>
         </div>
 
         <div class="input-group">
@@ -49,6 +62,7 @@
 
         <button id="searchBtn">Load Work Details</button>
 
+        <!-- Results Card -->
         <div class="details-card" id="resultCard">
             <h3><span id="displayName">...</span></h3>
             <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
@@ -80,22 +94,44 @@
   messagingSenderId: "182636263301",
   appId: "1:182636263301:web:d628c9f2d298a4f554f6ec"
 };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Auto-Suggest Logic: Fetch all names on load
+    // 🔴 NEW LIVE SEARCH JAVASCRIPT 🔴
+    let workerNamesArray = [];
     async function loadNamesForSuggest() {
-        const datalist = document.getElementById('workerNames');
         const snap = await getDocs(collection(db, "workers"));
-        snap.forEach(doc => {
-            let option = document.createElement('option');
-            option.value = doc.data().name;
-            datalist.appendChild(option);
-        });
+        snap.forEach(doc => workerNamesArray.push(doc.data().name));
     }
     loadNamesForSuggest();
 
-    // Search Logic
+    const searchInput = document.getElementById('searchName');
+    const searchList = document.getElementById('searchNameList');
+
+    searchInput.addEventListener('input', function() {
+        const val = this.value.toLowerCase();
+        searchList.innerHTML = '';
+        if (!val) return;
+        
+        const matches = workerNamesArray.filter(name => name.toLowerCase().includes(val));
+        matches.forEach(match => {
+            const div = document.createElement('div');
+            div.innerText = match;
+            div.addEventListener('click', function() {
+                searchInput.value = match;
+                searchList.innerHTML = '';
+            });
+            searchList.appendChild(div);
+        });
+    });
+
+    // Close the list if clicked outside
+    document.addEventListener('click', function(e) {
+        if (e.target !== searchInput) searchList.innerHTML = '';
+    });
+
+    // Original Search Logic
     document.getElementById('searchBtn').addEventListener('click', async () => {
         const nameInput = document.getElementById('searchName').value.trim();
         const monthInput = document.getElementById('searchMonth').value;
@@ -115,7 +151,6 @@
             
             const monthData = attSnap.docs[0].data();
 
-            // Math
             const daily = Number(workerData.daily_salary) || 0;
             const exRate = Number(workerData.extra_hour_rate) || 0;
             const days = Number(monthData.working_days) || 0;
@@ -127,7 +162,6 @@
             const total = (days * daily) + exPay;
             const due = total - exp - paid;
 
-            // Display
             document.getElementById('displayName').innerText = nameInput;
             document.getElementById('displayMonth').innerText = monthInput;
             document.getElementById('displayDays').innerText = days;
