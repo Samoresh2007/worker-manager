@@ -11,14 +11,25 @@
         h2, h3 { color: #1e293b; margin-top: 0; }
         .section-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         label { font-weight: 600; font-size: 13px; color: #475569; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px; font-size: 15px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px; font-size: 15px; outline: none; }
+        input:focus { border-color: #3b82f6; }
         button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; color: white; transition: 0.2s; }
         .btn-green { background: #10b981; } .btn-green:hover { background: #059669; }
         .btn-blue { background: #3b82f6; } .btn-blue:hover { background: #2563eb; }
         .btn-red { background: #ef4444; } .btn-red:hover { background: #dc2626; }
         .btn-logout { background: #64748b; margin-bottom: 20px; }
         
-        /* Table Styles for Management */
+        /* 🔴 FIXED LIVE SEARCH CSS 🔴 */
+        .autocomplete-container { position: relative; width: 100%; }
+        .autocomplete-items {
+            position: absolute; border: 1px solid #cbd5e1; border-top: none; z-index: 99;
+            top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 150px; overflow-y: auto;
+        }
+        .autocomplete-items:empty { display: none; /* Hides the empty line */ }
+        .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #333; }
+        .autocomplete-items div:hover { background-color: #eff6ff; color: #2563eb; font-weight: bold; }
+
         .worker-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
         .action-btns button { width: auto; padding: 6px 12px; margin-left: 5px; font-size: 12px; }
         
@@ -44,13 +55,13 @@
         <h2>Control Panel</h2>
         <button class="btn-logout" id="logoutBtn">Lock Session (Logout)</button>
 
-        <datalist id="adminWorkerNames"></datalist>
-
         <div class="section-box" style="border-left: 4px solid #10b981;">
             <h3>💳 Issue Payment</h3>
-            <p style="font-size: 12px; color: #666; margin-top: -10px;">Deducts amount from their total due balance.</p>
             <label>Worker Name:</label>
-            <input type="text" id="payName" list="adminWorkerNames">
+            <div class="autocomplete-container">
+                <input type="text" id="payName" autocomplete="off" placeholder="Start typing name...">
+                <div id="payNameList" class="autocomplete-items"></div>
+            </div>
             
             <label>Payment Date:</label>
             <input type="date" id="payDate">
@@ -63,7 +74,11 @@
         <div class="section-box" style="border-left: 4px solid #3b82f6;">
             <h3>📅 Input Monthly Work Record</h3>
             <label>Worker Name:</label>
-            <input type="text" id="dataName" list="adminWorkerNames">
+            <div class="autocomplete-container">
+                <input type="text" id="dataName" autocomplete="off" placeholder="Start typing name...">
+                <div id="dataNameList" class="autocomplete-items"></div>
+            </div>
+
             <div style="display: flex; gap: 10px;">
                 <div style="width:50%;"><label>Billing Month:</label><input type="month" id="dataMonth"></div>
                 <div style="width:50%;"><label>Days Worked:</label><input type="number" id="dataDays"></div>
@@ -106,7 +121,7 @@
     import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
-  const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
   authDomain: "worker-manager-7d563.firebaseapp.com",
   projectId: "worker-manager-7d563",
@@ -119,7 +134,37 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Auth Logic
+    let adminWorkerNamesArray = [];
+
+    function setupAutocomplete(inputId, listId) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+
+        input.addEventListener('input', function() {
+            const val = this.value.toLowerCase();
+            list.innerHTML = '';
+            if (!val) return;
+            
+            const matches = adminWorkerNamesArray.filter(name => name.toLowerCase().includes(val));
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                div.innerText = match;
+                div.addEventListener('click', function() {
+                    input.value = match;
+                    list.innerHTML = '';
+                });
+                list.appendChild(div);
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target !== input) list.innerHTML = '';
+        });
+    }
+
+    setupAutocomplete('payName', 'payNameList');
+    setupAutocomplete('dataName', 'dataNameList');
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('loginSection').style.display = 'none';
@@ -137,20 +182,17 @@
     });
     document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-    // Load Workers for Management and Dropdowns
     async function loadWorkersList() {
         const container = document.getElementById('workerListContainer');
-        const datalist = document.getElementById('adminWorkerNames');
-        container.innerHTML = ''; datalist.innerHTML = '';
+        container.innerHTML = ''; 
+        adminWorkerNamesArray = []; 
         
         const snap = await getDocs(collection(db, "workers"));
         snap.forEach(documentSnap => {
             const data = documentSnap.data();
             const id = documentSnap.id;
             
-            let option = document.createElement('option');
-            option.value = data.name;
-            datalist.appendChild(option);
+            adminWorkerNamesArray.push(data.name);
 
             const div = document.createElement('div');
             div.className = 'worker-item';
@@ -188,7 +230,6 @@
         });
     }
 
-    // Add / Update Worker
     document.getElementById('addWorkerBtn').addEventListener('click', async () => {
         const id = document.getElementById('editWorkerId').value;
         const name = document.getElementById('newWorkerName').value.trim();
@@ -218,15 +259,13 @@
         loadWorkersList();
     });
 
-    // Make Payment Feature (Updated for Date Picker)
     document.getElementById('payBtn').addEventListener('click', async () => {
         const name = document.getElementById('payName').value;
-        const fullDate = document.getElementById('payDate').value; // Formats as YYYY-MM-DD
+        const fullDate = document.getElementById('payDate').value; 
         const addAmount = Number(document.getElementById('payAmount').value);
 
         if(!name || !fullDate || !addAmount) return alert("Fill all payment fields!");
 
-        // Extract the YYYY-MM part to find the correct monthly bill
         const targetMonth = fullDate.substring(0, 7); 
 
         const q = query(collection(db, "attendance_records"), where("name", "==", name), where("month", "==", targetMonth));
@@ -239,14 +278,13 @@
             const currentPaid = Number(recordDoc.data().paid || 0);
             await updateDoc(doc(db, "attendance_records", recordDoc.id), {
                 paid: currentPaid + addAmount,
-                last_payment_date: fullDate // Logs the exact day the payment was made
+                last_payment_date: fullDate 
             });
             alert("Payment recorded successfully! The total due balance has been reduced.");
             document.getElementById('payAmount').value = '';
         }
     });
 
-    // Save Monthly Data
     document.getElementById('saveDataBtn').addEventListener('click', async () => {
         const name = document.getElementById('dataName').value;
         const month = document.getElementById('dataMonth').value;
