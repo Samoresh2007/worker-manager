@@ -2,100 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Worker Search System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Worker Portal</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            background-color: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 { text-align: center; color: #333; }
-        .input-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        input[type="text"], input[type="month"] {
-            width: 95%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover { background-color: #0056b3; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .app-container { background: white; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #0052cc, #003d99); color: white; padding: 20px; text-align: center; }
+        .header h2 { margin: 0; font-size: 22px; font-weight: 600; }
+        .content { padding: 25px 20px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
+        input { width: 100%; padding: 12px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
+        input:focus { border-color: #0052cc; }
+        button { width: 100%; padding: 14px; background: #0052cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #003d99; }
         
-        /* The Details Card is hidden by default until a search is made */
-        .details-card {
-            margin-top: 25px;
-            padding: 15px;
-            border: 2px dashed #007bff;
-            border-radius: 8px;
-            background-color: #f9fcff;
-            display: none; 
-        }
-        .details-card h3 { margin-top: 0; color: #007bff; }
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .divider { border-top: 1px solid #ccc; margin: 15px 0; }
-        .highlight { font-weight: bold; color: #d9534f; }
+        .details-card { margin-top: 25px; padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; display: none; }
+        .details-card h3 { margin: 0 0 15px 0; color: #1e293b; text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #475569; }
+        .data-row span:last-child { font-weight: 600; color: #0f172a; }
+        .highlight { background: #fee2e2; padding: 10px; border-radius: 8px; color: #b91c1c; margin-top: 15px; font-size: 16px; font-weight: bold; }
+        
+        .admin-link { text-align: center; margin-top: 20px; padding: 15px; background: #f1f5f9; }
+        .admin-link a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Worker Database</h2>
+<div class="app-container">
+    <div class="header">
+        <h2>Worker Search Portal</h2>
+    </div>
     
-    <div class="input-group">
-        <label>Search BY NAME:</label>
-        <input type="text" id="searchName" placeholder="e.g. Samoresh">
+    <div class="content">
+        <div class="input-group">
+            <label>Search by Name:</label>
+            <input type="text" id="searchName" list="workerNames" placeholder="Start typing a name..." autocomplete="off">
+            <datalist id="workerNames"></datalist>
+        </div>
+
+        <div class="input-group">
+            <label>Select Month & Year:</label>
+            <input type="month" id="searchMonth">
+        </div>
+
+        <button id="searchBtn">Load Work Details</button>
+
+        <div class="details-card" id="resultCard">
+            <h3><span id="displayName">...</span></h3>
+            <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
+            <div class="data-row"><span>Working Days:</span> <span id="displayDays">0</span></div>
+            <div class="data-row"><span>Daily Rate:</span> <span>₹<span id="displayDaily">0</span></span></div>
+            <div class="data-row"><span>Extra Hours:</span> <span id="displayExtraHrs">0</span></div>
+            <div class="data-row"><span>Extra Rate Pay:</span> <span>₹<span id="displayExtraPay">0</span></span></div>
+            <div class="data-row"><span>Deducted Expenses:</span> <span>₹<span id="displayExpense">0</span></span></div>
+            <div class="data-row"><span>Amount Already Paid:</span> <span style="color:#059669;">₹<span id="displayPaid">0</span></span></div>
+            <div class="data-row highlight"><span>Current Due Amount:</span> <span>₹<span id="displayDue">0</span></span></div>
+        </div>
     </div>
-
-    <div class="input-group">
-        <label>Select Year & Month:</label>
-        <input type="month" id="searchMonth">
-    </div>
-
-    <button id="searchBtn">Click to Load Details</button>
-
-    <div class="details-card" id="resultCard">
-        <h3>Name: <span id="displayName">...</span></h3>
-        <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
-        <div class="divider"></div>
-        <div class="data-row"><span>Total Working Days:</span> <span id="displayDays">0</span></div>
-        <div class="data-row"><span>Daily Salary:</span> <span>₹<span id="displayDaily">0</span></span></div>
-        <div class="data-row"><span>Extra Hours:</span> <span id="displayExtraHrs">0</span></div>
-        <div class="data-row"><span>Extra Hour's Pay:</span> <span>₹<span id="displayExtraPay">0</span></span></div>
-        <div class="divider"></div>
-        <div class="data-row"><span>Expense:</span> <span>₹<span id="displayExpense">0</span></span></div>
-        <div class="data-row"><span>Paid:</span> <span>₹<span id="displayPaid">0</span></span></div>
-        <div class="data-row highlight"><span>Due:</span> <span>₹<span id="displayDue">0</span></span></div>
+    
+    <div class="admin-link">
+        <a href="admin.html">🔒 Admin Portal Login</a>
     </div>
 </div>
 
 <script type="module">
-    // 1. Import Firebase tools directly from Google
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // 2. YOUR FIREBASE CONFIGURATION GOES HERE
-   const firebaseConfig = {
+    // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
+    const firebaseConfig = {
   apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
   authDomain: "worker-manager-7d563.firebaseapp.com",
   projectId: "worker-manager-7d563",
@@ -104,80 +81,66 @@
   appId: "1:182636263301:web:d628c9f2d298a4f554f6ec"
 };
 
-    // 3. Start Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 4. The Search Button Logic
+    // Auto-Suggest Logic: Fetch all names on load
+    async function loadNamesForSuggest() {
+        const datalist = document.getElementById('workerNames');
+        const snap = await getDocs(collection(db, "workers"));
+        snap.forEach(doc => {
+            let option = document.createElement('option');
+            option.value = doc.data().name;
+            datalist.appendChild(option);
+        });
+    }
+    loadNamesForSuggest();
+
+    // Search Logic
     document.getElementById('searchBtn').addEventListener('click', async () => {
         const nameInput = document.getElementById('searchName').value.trim();
-        const monthInput = document.getElementById('searchMonth').value; // Format is YYYY-MM
+        const monthInput = document.getElementById('searchMonth').value;
         const resultCard = document.getElementById('resultCard');
-
-        if (!nameInput || !monthInput) {
-            alert("Please enter a name and select a month.");
-            return;
-        }
+        if (!nameInput || !monthInput) return alert("Enter name and month!");
 
         try {
-            // Step A: Search for the Worker's base salary
-            const workersRef = collection(db, "workers");
-            const workerQuery = query(workersRef, where("name", "==", nameInput));
-            const workerSnapshot = await getDocs(workerQuery);
-
-            if (workerSnapshot.empty) {
-                alert("Worker name not found in database.");
-                resultCard.style.display = 'none';
-                return;
-            }
-            const workerData = workerSnapshot.docs[0].data();
-
-            // Step B: Search for their monthly record
-            const attendanceRef = collection(db, "attendance_records");
-            const attendanceQuery = query(attendanceRef, 
-                where("name", "==", nameInput),
-                where("month", "==", monthInput)
-            );
-            const attendanceSnapshot = await getDocs(attendanceQuery);
-
-            if (attendanceSnapshot.empty) {
-                alert("No work records found for this month.");
-                resultCard.style.display = 'none';
-                return;
-            }
-            const monthData = attendanceSnapshot.docs[0].data();
-
-            // Step C: Calculate the math
-            const dailySalary = Number(workerData.daily_salary) || 0;
-            const extraHourRate = Number(workerData.extra_hour_rate) || 0;
+            const workerQuery = query(collection(db, "workers"), where("name", "==", nameInput));
+            const workerSnap = await getDocs(workerQuery);
+            if (workerSnap.empty) { resultCard.style.display = 'none'; return alert("Worker not found!"); }
             
-            const workingDays = Number(monthData.working_days) || 0;
-            const extraHours = Number(monthData.extra_hours) || 0;
-            const expense = Number(monthData.expense) || 0;
+            const workerData = workerSnap.docs[0].data();
+            
+            const attQuery = query(collection(db, "attendance_records"), where("name", "==", nameInput), where("month", "==", monthInput));
+            const attSnap = await getDocs(attQuery);
+            if (attSnap.empty) { resultCard.style.display = 'none'; return alert("No records for this month!"); }
+            
+            const monthData = attSnap.docs[0].data();
+
+            // Math
+            const daily = Number(workerData.daily_salary) || 0;
+            const exRate = Number(workerData.extra_hour_rate) || 0;
+            const days = Number(monthData.working_days) || 0;
+            const exHrs = Number(monthData.extra_hours) || 0;
+            const exp = Number(monthData.expense) || 0;
             const paid = Number(monthData.paid) || 0;
 
-            const extraPay = extraHours * extraHourRate;
-            const totalEarned = (workingDays * dailySalary) + extraPay;
-            const dueAmount = totalEarned - expense - paid;
+            const exPay = exHrs * exRate;
+            const total = (days * daily) + exPay;
+            const due = total - exp - paid;
 
-            // Step D: Put the numbers on the screen
+            // Display
             document.getElementById('displayName').innerText = nameInput;
             document.getElementById('displayMonth').innerText = monthInput;
-            document.getElementById('displayDays').innerText = workingDays;
-            document.getElementById('displayDaily').innerText = dailySalary;
-            document.getElementById('displayExtraHrs').innerText = extraHours;
-            document.getElementById('displayExtraPay').innerText = extraPay;
-            document.getElementById('displayExpense').innerText = expense;
+            document.getElementById('displayDays').innerText = days;
+            document.getElementById('displayDaily').innerText = daily;
+            document.getElementById('displayExtraHrs').innerText = exHrs;
+            document.getElementById('displayExtraPay').innerText = exPay;
+            document.getElementById('displayExpense').innerText = exp;
             document.getElementById('displayPaid').innerText = paid;
-            document.getElementById('displayDue').innerText = dueAmount;
+            document.getElementById('displayDue').innerText = due;
 
-            // Show the card
             resultCard.style.display = 'block';
-
-        } catch (error) {
-            console.error("Error connecting to database: ", error);
-            alert("An error occurred. Check the console for details.");
-        }
+        } catch (error) { alert("Error: " + error.message); }
     });
 </script>
 </body>
