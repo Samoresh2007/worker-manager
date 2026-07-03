@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Search System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 { text-align: center; color: #333; }
+        .input-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="month"] {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        
+        /* The Details Card is hidden by default until a search is made */
+        .details-card {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            background-color: #f9fcff;
+            display: none; 
+        }
+        .details-card h3 { margin-top: 0; color: #007bff; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .divider { border-top: 1px solid #ccc; margin: 15px 0; }
+        .highlight { font-weight: bold; color: #d9534f; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Worker Database</h2>
+    
+    <div class="input-group">
+        <label>Search BY NAME:</label>
+        <input type="text" id="searchName" placeholder="e.g. Samoresh">
+    </div>
+
+    <div class="input-group">
+        <label>Select Year & Month:</label>
+        <input type="month" id="searchMonth">
+    </div>
+
+    <button id="searchBtn">Click to Load Details</button>
+
+    <div class="details-card" id="resultCard">
+        <h3>Name: <span id="displayName">...</span></h3>
+        <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
+        <div class="divider"></div>
+        <div class="data-row"><span>Total Working Days:</span> <span id="displayDays">0</span></div>
+        <div class="data-row"><span>Daily Salary:</span> <span>₹<span id="displayDaily">0</span></span></div>
+        <div class="data-row"><span>Extra Hours:</span> <span id="displayExtraHrs">0</span></div>
+        <div class="data-row"><span>Extra Hour's Pay:</span> <span>₹<span id="displayExtraPay">0</span></span></div>
+        <div class="divider"></div>
+        <div class="data-row"><span>Expense:</span> <span>₹<span id="displayExpense">0</span></span></div>
+        <div class="data-row"><span>Paid:</span> <span>₹<span id="displayPaid">0</span></span></div>
+        <div class="data-row highlight"><span>Due:</span> <span>₹<span id="displayDue">0</span></span></div>
+    </div>
+</div>
+
+<script type="module">
+    // 1. Import Firebase tools directly from Google
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // 2. YOUR FIREBASE CONFIGURATION GOES HERE
+   const firebaseConfig = {
+  apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
+  authDomain: "worker-manager-7d563.firebaseapp.com",
+  projectId: "worker-manager-7d563",
+  storageBucket: "worker-manager-7d563.firebasestorage.app",
+  messagingSenderId: "182636263301",
+  appId: "1:182636263301:web:d628c9f2d298a4f554f6ec"
+};
+
+    // 3. Start Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 4. The Search Button Logic
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+        const nameInput = document.getElementById('searchName').value.trim();
+        const monthInput = document.getElementById('searchMonth').value; // Format is YYYY-MM
+        const resultCard = document.getElementById('resultCard');
+
+        if (!nameInput || !monthInput) {
+            alert("Please enter a name and select a month.");
+            return;
+        }
+
+        try {
+            // Step A: Search for the Worker's base salary
+            const workersRef = collection(db, "workers");
+            const workerQuery = query(workersRef, where("name", "==", nameInput));
+            const workerSnapshot = await getDocs(workerQuery);
+
+            if (workerSnapshot.empty) {
+                alert("Worker name not found in database.");
+                resultCard.style.display = 'none';
+                return;
+            }
+            const workerData = workerSnapshot.docs[0].data();
+
+            // Step B: Search for their monthly record
+            const attendanceRef = collection(db, "attendance_records");
+            const attendanceQuery = query(attendanceRef, 
+                where("name", "==", nameInput),
+                where("month", "==", monthInput)
+            );
+            const attendanceSnapshot = await getDocs(attendanceQuery);
+
+            if (attendanceSnapshot.empty) {
+                alert("No work records found for this month.");
+                resultCard.style.display = 'none';
+                return;
+            }
+            const monthData = attendanceSnapshot.docs[0].data();
+
+            // Step C: Calculate the math
+            const dailySalary = Number(workerData.daily_salary) || 0;
+            const extraHourRate = Number(workerData.extra_hour_rate) || 0;
+            
+            const workingDays = Number(monthData.working_days) || 0;
+            const extraHours = Number(monthData.extra_hours) || 0;
+            const expense = Number(monthData.expense) || 0;
+            const paid = Number(monthData.paid) || 0;
+
+            const extraPay = extraHours * extraHourRate;
+            const totalEarned = (workingDays * dailySalary) + extraPay;
+            const dueAmount = totalEarned - expense - paid;
+
+            // Step D: Put the numbers on the screen
+            document.getElementById('displayName').innerText = nameInput;
+            document.getElementById('displayMonth').innerText = monthInput;
+            document.getElementById('displayDays').innerText = workingDays;
+            document.getElementById('displayDaily').innerText = dailySalary;
+            document.getElementById('displayExtraHrs').innerText = extraHours;
+            document.getElementById('displayExtraPay').innerText = extraPay;
+            document.getElementById('displayExpense').innerText = expense;
+            document.getElementById('displayPaid').innerText = paid;
+            document.getElementById('displayDue').innerText = dueAmount;
+
+            // Show the card
+            resultCard.style.display = 'block';
+
+        } catch (error) {
+            console.error("Error connecting to database: ", error);
+            alert("An error occurred. Check the console for details.");
+        }
+    });
+</script>
+</body>
+</html>
