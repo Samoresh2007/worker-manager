@@ -3,76 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Worker Portal</title>
+    <title>Admin Dashboard</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app-container { background: white; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #0052cc, #003d99); color: white; padding: 20px; text-align: center; }
-        .header h2 { margin: 0; font-size: 22px; font-weight: 600; }
-        .content { padding: 25px 20px; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
-        input:focus { border-color: #0052cc; }
-        button { width: 100%; padding: 14px; background: #0052cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #003d99; }
+        body { background-color: #f1f5f9; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2, h3 { color: #1e293b; margin-top: 0; }
+        .section-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
+        label { font-weight: 600; font-size: 13px; color: #475569; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px; font-size: 15px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-green { background: #10b981; } .btn-green:hover { background: #059669; }
+        .btn-blue { background: #3b82f6; } .btn-blue:hover { background: #2563eb; }
+        .btn-red { background: #ef4444; } .btn-red:hover { background: #dc2626; }
+        .btn-logout { background: #64748b; margin-bottom: 20px; }
         
-        .details-card { margin-top: 25px; padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; display: none; }
-        .details-card h3 { margin: 0 0 15px 0; color: #1e293b; text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #475569; }
-        .data-row span:last-child { font-weight: 600; color: #0f172a; }
-        .highlight { background: #fee2e2; padding: 10px; border-radius: 8px; color: #b91c1c; margin-top: 15px; font-size: 16px; font-weight: bold; }
+        /* Table Styles for Management */
+        .worker-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
+        .action-btns button { width: auto; padding: 6px 12px; margin-left: 5px; font-size: 12px; }
         
-        .admin-link { text-align: center; margin-top: 20px; padding: 15px; background: #f1f5f9; }
-        .admin-link a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; }
+        #dashboardSection { display: none; }
+        .hidden-edit-id { display: none; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header">
-        <h2>Worker Search Portal</h2>
-    </div>
+<div class="container">
     
-    <div class="content">
-        <div class="input-group">
-            <label>Search by Name:</label>
-            <input type="text" id="searchName" list="workerNames" placeholder="Start typing a name..." autocomplete="off">
-            <datalist id="workerNames"></datalist>
-        </div>
-
-        <div class="input-group">
-            <label>Select Month & Year:</label>
-            <input type="month" id="searchMonth">
-        </div>
-
-        <button id="searchBtn">Load Work Details</button>
-
-        <div class="details-card" id="resultCard">
-            <h3><span id="displayName">...</span></h3>
-            <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
-            <div class="data-row"><span>Working Days:</span> <span id="displayDays">0</span></div>
-            <div class="data-row"><span>Daily Rate:</span> <span>₹<span id="displayDaily">0</span></span></div>
-            <div class="data-row"><span>Extra Hours:</span> <span id="displayExtraHrs">0</span></div>
-            <div class="data-row"><span>Extra Rate Pay:</span> <span>₹<span id="displayExtraPay">0</span></span></div>
-            <div class="data-row"><span>Deducted Expenses:</span> <span>₹<span id="displayExpense">0</span></span></div>
-            <div class="data-row"><span>Amount Already Paid:</span> <span style="color:#059669;">₹<span id="displayPaid">0</span></span></div>
-            <div class="data-row highlight"><span>Current Due Amount:</span> <span>₹<span id="displayDue">0</span></span></div>
-        </div>
+    <div id="loginSection">
+        <h2>Admin Portal Security</h2>
+        <label>Admin Email:</label>
+        <input type="email" id="loginEmail" placeholder="admin@domain.com">
+        <label>Password:</label>
+        <input type="password" id="loginPassword" placeholder="••••••••">
+        <button class="btn-blue" id="loginBtn">Authenticate</button>
+        <p id="loginError" style="color:red; display:none; font-size: 13px; text-align: center;">Access Denied.</p>
     </div>
-    
-    <div class="admin-link">
-        <a href="admin.html">🔒 Admin Portal Login</a>
+
+    <div id="dashboardSection">
+        <h2>Control Panel</h2>
+        <button class="btn-logout" id="logoutBtn">Lock Session (Logout)</button>
+
+        <datalist id="adminWorkerNames"></datalist>
+
+        <div class="section-box" style="border-left: 4px solid #10b981;">
+            <h3>💳 Issue Payment</h3>
+            <p style="font-size: 12px; color: #666; margin-top: -10px;">Deducts amount from their total due balance.</p>
+            <label>Worker Name:</label>
+            <input type="text" id="payName" list="adminWorkerNames">
+            
+            <label>Payment Date:</label>
+            <input type="date" id="payDate">
+            
+            <label>Amount to Pay (₹):</label>
+            <input type="number" id="payAmount">
+            <button class="btn-green" id="payBtn">Submit Payment</button>
+        </div>
+
+        <div class="section-box" style="border-left: 4px solid #3b82f6;">
+            <h3>📅 Input Monthly Work Record</h3>
+            <label>Worker Name:</label>
+            <input type="text" id="dataName" list="adminWorkerNames">
+            <div style="display: flex; gap: 10px;">
+                <div style="width:50%;"><label>Billing Month:</label><input type="month" id="dataMonth"></div>
+                <div style="width:50%;"><label>Days Worked:</label><input type="number" id="dataDays"></div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div style="width:50%;"><label>Extra Hours:</label><input type="number" id="dataExtraHrs" value="0"></div>
+                <div style="width:50%;"><label>Expenses (₹):</label><input type="number" id="dataExpense" value="0"></div>
+            </div>
+            <label>Initial Payment Given (₹):</label>
+            <input type="number" id="dataPaid" value="0">
+            <button class="btn-blue" id="saveDataBtn">Save Monthly Record</button>
+        </div>
+
+        <div class="section-box" style="border-left: 4px solid #8b5cf6;">
+            <h3 id="formTitle">👤 Add New Worker</h3>
+            <input type="text" id="editWorkerId" class="hidden-edit-id">
+            <label>Name:</label>
+            <input type="text" id="newWorkerName">
+            <label>Type:</label>
+            <select id="newWorkerType"><option value="Mistri">Mistri</option><option value="Labour">Labour</option></select>
+            <div style="display: flex; gap: 10px;">
+                <div style="width:50%;"><label>Daily Rate:</label><input type="number" id="newWorkerSalary"></div>
+                <div style="width:50%;"><label>Extra Hr Rate:</label><input type="number" id="newWorkerExtraRate"></div>
+            </div>
+            <button class="btn-blue" id="addWorkerBtn" style="background:#8b5cf6;">Save Worker Profile</button>
+        </div>
+
+        <div class="section-box">
+            <h3>⚙️ Manage Roster</h3>
+            <div id="workerListContainer">
+                </div>
+        </div>
+
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
-    const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
   authDomain: "worker-manager-7d563.firebaseapp.com",
   projectId: "worker-manager-7d563",
@@ -82,65 +116,154 @@
 };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Auto-Suggest Logic: Fetch all names on load
-    async function loadNamesForSuggest() {
-        const datalist = document.getElementById('workerNames');
+    // Auth Logic
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            loadWorkersList(); 
+        } else {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').style.display = 'none';
+        }
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
+            .catch(() => document.getElementById('loginError').style.display = 'block');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+    // Load Workers for Management and Dropdowns
+    async function loadWorkersList() {
+        const container = document.getElementById('workerListContainer');
+        const datalist = document.getElementById('adminWorkerNames');
+        container.innerHTML = ''; datalist.innerHTML = '';
+        
         const snap = await getDocs(collection(db, "workers"));
-        snap.forEach(doc => {
+        snap.forEach(documentSnap => {
+            const data = documentSnap.data();
+            const id = documentSnap.id;
+            
             let option = document.createElement('option');
-            option.value = doc.data().name;
+            option.value = data.name;
             datalist.appendChild(option);
+
+            const div = document.createElement('div');
+            div.className = 'worker-item';
+            div.innerHTML = `
+                <strong>${data.name}</strong> (${data.type})
+                <div class="action-btns">
+                    <button class="btn-blue edit-btn" data-id="${id}" data-name="${data.name}" data-type="${data.type}" data-sal="${data.daily_salary}" data-ex="${data.extra_hour_rate}">Edit</button>
+                    <button class="btn-red del-btn" data-id="${id}">Del</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        document.querySelectorAll('.del-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                if(confirm("Are you sure you want to delete this worker forever?")) {
+                    await deleteDoc(doc(db, "workers", e.target.getAttribute('data-id')));
+                    loadWorkersList();
+                }
+            });
+        });
+
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const b = e.target;
+                document.getElementById('formTitle').innerText = "📝 Edit Worker";
+                document.getElementById('addWorkerBtn').innerText = "Update Profile";
+                document.getElementById('editWorkerId').value = b.getAttribute('data-id');
+                document.getElementById('newWorkerName').value = b.getAttribute('data-name');
+                document.getElementById('newWorkerType').value = b.getAttribute('data-type');
+                document.getElementById('newWorkerSalary').value = b.getAttribute('data-sal');
+                document.getElementById('newWorkerExtraRate').value = b.getAttribute('data-ex');
+                window.scrollTo(0, document.getElementById('formTitle').offsetTop);
+            });
         });
     }
-    loadNamesForSuggest();
 
-    // Search Logic
-    document.getElementById('searchBtn').addEventListener('click', async () => {
-        const nameInput = document.getElementById('searchName').value.trim();
-        const monthInput = document.getElementById('searchMonth').value;
-        const resultCard = document.getElementById('resultCard');
-        if (!nameInput || !monthInput) return alert("Enter name and month!");
+    // Add / Update Worker
+    document.getElementById('addWorkerBtn').addEventListener('click', async () => {
+        const id = document.getElementById('editWorkerId').value;
+        const name = document.getElementById('newWorkerName').value.trim();
+        const data = {
+            name: name,
+            type: document.getElementById('newWorkerType').value,
+            daily_salary: Number(document.getElementById('newWorkerSalary').value),
+            extra_hour_rate: Number(document.getElementById('newWorkerExtraRate').value)
+        };
 
-        try {
-            const workerQuery = query(collection(db, "workers"), where("name", "==", nameInput));
-            const workerSnap = await getDocs(workerQuery);
-            if (workerSnap.empty) { resultCard.style.display = 'none'; return alert("Worker not found!"); }
-            
-            const workerData = workerSnap.docs[0].data();
-            
-            const attQuery = query(collection(db, "attendance_records"), where("name", "==", nameInput), where("month", "==", monthInput));
-            const attSnap = await getDocs(attQuery);
-            if (attSnap.empty) { resultCard.style.display = 'none'; return alert("No records for this month!"); }
-            
-            const monthData = attSnap.docs[0].data();
+        if(!name) return alert("Name is required.");
 
-            // Math
-            const daily = Number(workerData.daily_salary) || 0;
-            const exRate = Number(workerData.extra_hour_rate) || 0;
-            const days = Number(monthData.working_days) || 0;
-            const exHrs = Number(monthData.extra_hours) || 0;
-            const exp = Number(monthData.expense) || 0;
-            const paid = Number(monthData.paid) || 0;
+        if(id) {
+            await updateDoc(doc(db, "workers", id), data);
+            alert("Worker Updated!");
+        } else {
+            await addDoc(collection(db, "workers"), data);
+            alert("Worker Added!");
+        }
+        
+        document.getElementById('editWorkerId').value = '';
+        document.getElementById('newWorkerName').value = '';
+        document.getElementById('newWorkerSalary').value = '';
+        document.getElementById('newWorkerExtraRate').value = '';
+        document.getElementById('formTitle').innerText = "👤 Add New Worker";
+        document.getElementById('addWorkerBtn').innerText = "Save Worker Profile";
+        loadWorkersList();
+    });
 
-            const exPay = exHrs * exRate;
-            const total = (days * daily) + exPay;
-            const due = total - exp - paid;
+    // Make Payment Feature (Updated for Date Picker)
+    document.getElementById('payBtn').addEventListener('click', async () => {
+        const name = document.getElementById('payName').value;
+        const fullDate = document.getElementById('payDate').value; // Formats as YYYY-MM-DD
+        const addAmount = Number(document.getElementById('payAmount').value);
 
-            // Display
-            document.getElementById('displayName').innerText = nameInput;
-            document.getElementById('displayMonth').innerText = monthInput;
-            document.getElementById('displayDays').innerText = days;
-            document.getElementById('displayDaily').innerText = daily;
-            document.getElementById('displayExtraHrs').innerText = exHrs;
-            document.getElementById('displayExtraPay').innerText = exPay;
-            document.getElementById('displayExpense').innerText = exp;
-            document.getElementById('displayPaid').innerText = paid;
-            document.getElementById('displayDue').innerText = due;
+        if(!name || !fullDate || !addAmount) return alert("Fill all payment fields!");
 
-            resultCard.style.display = 'block';
-        } catch (error) { alert("Error: " + error.message); }
+        // Extract the YYYY-MM part to find the correct monthly bill
+        const targetMonth = fullDate.substring(0, 7); 
+
+        const q = query(collection(db, "attendance_records"), where("name", "==", name), where("month", "==", targetMonth));
+        const snap = await getDocs(q);
+
+        if(snap.empty) {
+            alert(`Cannot pay! No work record found for ${targetMonth} yet. Please create a monthly record first.`);
+        } else {
+            const recordDoc = snap.docs[0];
+            const currentPaid = Number(recordDoc.data().paid || 0);
+            await updateDoc(doc(db, "attendance_records", recordDoc.id), {
+                paid: currentPaid + addAmount,
+                last_payment_date: fullDate // Logs the exact day the payment was made
+            });
+            alert("Payment recorded successfully! The total due balance has been reduced.");
+            document.getElementById('payAmount').value = '';
+        }
+    });
+
+    // Save Monthly Data
+    document.getElementById('saveDataBtn').addEventListener('click', async () => {
+        const name = document.getElementById('dataName').value;
+        const month = document.getElementById('dataMonth').value;
+        if(!name || !month) return alert("Worker Name and Month required!");
+
+        await addDoc(collection(db, "attendance_records"), {
+            name: name, month: month,
+            working_days: Number(document.getElementById('dataDays').value || 0),
+            extra_hours: Number(document.getElementById('dataExtraHrs').value || 0),
+            expense: Number(document.getElementById('dataExpense').value || 0),
+            paid: Number(document.getElementById('dataPaid').value || 0)
+        });
+        alert("Monthly record saved!");
+        document.getElementById('dataDays').value = '';
+        document.getElementById('dataExtraHrs').value = '0';
+        document.getElementById('dataExpense').value = '0';
+        document.getElementById('dataPaid').value = '0';
     });
 </script>
 </body>
