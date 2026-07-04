@@ -6,8 +6,8 @@
     <title>Worker Portal</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app-container { background: white; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; }
+        body { background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; }
+        .app-container { background: white; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 20px; }
         .header { background: linear-gradient(135deg, #0052cc, #003d99); color: white; padding: 20px; text-align: center; }
         .header h2 { margin: 0; font-size: 22px; font-weight: 600; }
         .content { padding: 25px 20px; }
@@ -18,13 +18,9 @@
         button { width: 100%; padding: 14px; background: #0052cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { background: #003d99; }
         
-        /* 🔴 NEW LIVE SEARCH CSS 🔴 */
         .autocomplete-container { position: relative; width: 100%; }
-        .autocomplete-items {
-            position: absolute; border: 1px solid #d1d5db; border-top: none; z-index: 99;
-            top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;
-        }
+        .autocomplete-items { position: absolute; border: 1px solid #d1d5db; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; }
+        .autocomplete-items:empty { display: none; }
         .autocomplete-items div { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #333; }
         .autocomplete-items div:hover { background-color: #f8fafc; color: #0052cc; font-weight: bold; }
 
@@ -34,7 +30,10 @@
         .data-row span:last-child { font-weight: 600; color: #0f172a; }
         .highlight { background: #fee2e2; padding: 10px; border-radius: 8px; color: #b91c1c; margin-top: 15px; font-size: 16px; font-weight: bold; }
         
-        .admin-link { text-align: center; margin-top: 20px; padding: 15px; background: #f1f5f9; }
+        .eating-log-box { background: #fffbeb; padding: 15px; border-radius: 12px; border: 1px solid #fde68a; display: none; margin-top: 15px; }
+        .eating-log-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; border-bottom: 1px dashed #fcd34d; padding-bottom: 5px; }
+
+        .admin-link { text-align: center; padding: 15px; background: #f1f5f9; width: 100%; }
         .admin-link a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; }
     </style>
 </head>
@@ -48,21 +47,17 @@
     <div class="content">
         <div class="input-group">
             <label>Search by Name:</label>
-            <!-- 🔴 NEW LIVE SEARCH HTML 🔴 -->
             <div class="autocomplete-container">
                 <input type="text" id="searchName" placeholder="Start typing a name..." autocomplete="off">
                 <div id="searchNameList" class="autocomplete-items"></div>
             </div>
         </div>
-
         <div class="input-group">
             <label>Select Month & Year:</label>
             <input type="month" id="searchMonth">
         </div>
-
         <button id="searchBtn">Load Work Details</button>
 
-        <!-- Results Card -->
         <div class="details-card" id="resultCard">
             <h3><span id="displayName">...</span></h3>
             <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
@@ -70,10 +65,30 @@
             <div class="data-row"><span>Daily Rate:</span> <span>₹<span id="displayDaily">0</span></span></div>
             <div class="data-row"><span>Extra Hours:</span> <span id="displayExtraHrs">0</span></div>
             <div class="data-row"><span>Extra Rate Pay:</span> <span>₹<span id="displayExtraPay">0</span></span></div>
-            <div class="data-row"><span>Deducted Expenses:</span> <span>₹<span id="displayExpense">0</span></span></div>
+            <div style="border-top: 1px solid #ccc; margin: 10px 0;"></div>
+            <div class="data-row"><span>Manual Expenses:</span> <span>₹<span id="displayExpense">0</span></span></div>
+            <div class="data-row"><span>Shared Eating Deductions:</span> <span style="color: #d97706;">₹<span id="displayEating">0</span></span></div>
             <div class="data-row"><span>Amount Already Paid:</span> <span style="color:#059669;">₹<span id="displayPaid">0</span></span></div>
             <div class="data-row highlight"><span>Current Due Amount:</span> <span>₹<span id="displayDue">0</span></span></div>
         </div>
+
+        <div style="border-top: 2px solid #e2e8f0; margin: 30px 0 20px 0;"></div>
+
+        <div class="input-group">
+            <label style="color: #d97706;">🍔 View Shared Eating Costs:</label>
+            <input type="month" id="eatingSearchMonth">
+            <button id="eatingSearchBtn" style="background: #f59e0b; margin-top: 10px;">Load Eating Costs</button>
+        </div>
+        
+        <div class="eating-log-box" id="eatingCostResult">
+            <h4 style="margin: 0 0 10px 0; color: #b45309; text-align: center;">Food Expense Log</h4>
+            <div id="eatingCostList"></div>
+            <div style="border-top: 2px solid #fcd34d; margin-top: 10px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: bold; color: #92400e;">
+                <span>Total for Month:</span>
+                <span>₹<span id="eatingTotalMonth">0</span></span>
+            </div>
+        </div>
+
     </div>
     
     <div class="admin-link">
@@ -98,7 +113,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 🔴 NEW LIVE SEARCH JAVASCRIPT 🔴
     let workerNamesArray = [];
     async function loadNamesForSuggest() {
         const snap = await getDocs(collection(db, "workers"));
@@ -113,7 +127,6 @@
         const val = this.value.toLowerCase();
         searchList.innerHTML = '';
         if (!val) return;
-        
         const matches = workerNamesArray.filter(name => name.toLowerCase().includes(val));
         matches.forEach(match => {
             const div = document.createElement('div');
@@ -126,12 +139,9 @@
         });
     });
 
-    // Close the list if clicked outside
-    document.addEventListener('click', function(e) {
-        if (e.target !== searchInput) searchList.innerHTML = '';
-    });
+    document.addEventListener('click', function(e) { if (e.target !== searchInput) searchList.innerHTML = ''; });
 
-    // Original Search Logic
+    // Original Search Logic + Eating Deductions
     document.getElementById('searchBtn').addEventListener('click', async () => {
         const nameInput = document.getElementById('searchName').value.trim();
         const monthInput = document.getElementById('searchMonth').value;
@@ -142,13 +152,11 @@
             const workerQuery = query(collection(db, "workers"), where("name", "==", nameInput));
             const workerSnap = await getDocs(workerQuery);
             if (workerSnap.empty) { resultCard.style.display = 'none'; return alert("Worker not found!"); }
-            
             const workerData = workerSnap.docs[0].data();
             
             const attQuery = query(collection(db, "attendance_records"), where("name", "==", nameInput), where("month", "==", monthInput));
             const attSnap = await getDocs(attQuery);
             if (attSnap.empty) { resultCard.style.display = 'none'; return alert("No records for this month!"); }
-            
             const monthData = attSnap.docs[0].data();
 
             const daily = Number(workerData.daily_salary) || 0;
@@ -157,10 +165,11 @@
             const exHrs = Number(monthData.extra_hours) || 0;
             const exp = Number(monthData.expense) || 0;
             const paid = Number(monthData.paid) || 0;
+            const eating = Number(monthData.eating_expense) || 0; // NEW!
 
             const exPay = exHrs * exRate;
             const total = (days * daily) + exPay;
-            const due = total - exp - paid;
+            const due = total - exp - paid - eating; // Math updated!
 
             document.getElementById('displayName').innerText = nameInput;
             document.getElementById('displayMonth').innerText = monthInput;
@@ -169,11 +178,41 @@
             document.getElementById('displayExtraHrs').innerText = exHrs;
             document.getElementById('displayExtraPay').innerText = exPay;
             document.getElementById('displayExpense').innerText = exp;
+            document.getElementById('displayEating').innerText = eating.toFixed(2);
             document.getElementById('displayPaid').innerText = paid;
-            document.getElementById('displayDue').innerText = due;
+            document.getElementById('displayDue').innerText = due.toFixed(2);
 
             resultCard.style.display = 'block';
         } catch (error) { alert("Error: " + error.message); }
+    });
+
+    // NEW: Eating Cost Log Fetcher
+    document.getElementById('eatingSearchBtn').addEventListener('click', async () => {
+        const monthInput = document.getElementById('eatingSearchMonth').value;
+        if(!monthInput) return alert("Please select a month!");
+        
+        const q = query(collection(db, "eating_costs"), where("month", "==", monthInput));
+        const snap = await getDocs(q);
+        
+        const listDiv = document.getElementById('eatingCostList');
+        listDiv.innerHTML = '';
+        let total = 0;
+        
+        if(snap.empty) {
+            listDiv.innerHTML = '<p style="text-align:center; color:#92400e;">No shared eating costs recorded for this month.</p>';
+        } else {
+            snap.forEach(doc => {
+                const d = doc.data();
+                total += Number(d.total_amount);
+                listDiv.innerHTML += `
+                    <div class="eating-log-item">
+                        <span>📅 ${d.date}</span>
+                        <span>₹${d.total_amount} <small style="color:#b45309;">(₹${d.split_amount.toFixed(1)}/ea)</small></span>
+                    </div>`;
+            });
+        }
+        document.getElementById('eatingTotalMonth').innerText = total;
+        document.getElementById('eatingCostResult').style.display = 'block';
     });
 </script>
 </body>
