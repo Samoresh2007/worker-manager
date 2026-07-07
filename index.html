@@ -3,35 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Worker Portal</title>
+    <title>Document Vault & Loan Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; }
-        .app-container { background: white; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 20px; }
-        .header { background: linear-gradient(135deg, #0052cc, #003d99); color: white; padding: 20px; text-align: center; }
-        .header h2 { margin: 0; font-size: 22px; font-weight: 600; }
-        .content { padding: 25px 20px; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
-        input:focus { border-color: #0052cc; }
-        button { width: 100%; padding: 14px; background: #0052cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #003d99; }
+        body { background-color: #f8fafc; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .app-container { background: white; width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 20px; }
+        .header { background: linear-gradient(135deg, #1e3a8a, #0d9488); color: white; padding: 25px 20px; text-align: center; }
+        .header h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .content { padding: 20px; }
         
-        .autocomplete-container { position: relative; width: 100%; }
-        .autocomplete-items { position: absolute; border: 1px solid #d1d5db; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; }
-        .autocomplete-items:empty { display: none; }
-        .autocomplete-items div { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #333; }
-        .autocomplete-items div:hover { background-color: #f8fafc; color: #0052cc; font-weight: bold; }
+        .section-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .section-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 13px; }
+        input, select { width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.2s; background: white; margin-bottom: 15px; }
+        input:focus, select:focus { border-color: #0d9488; }
+        button { width: 100%; padding: 12px; background: #0d9488; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #0f766e; }
+        .btn-pay-online { background: #3b82f6; margin-top: 15px; display: block; text-align: center; text-decoration: none; color: white; border-radius: 8px; padding: 12px; font-weight: bold; font-size: 15px; transition: 0.2s; }
+        .btn-pay-online:hover { background: #2563eb; }
 
-        .details-card { margin-top: 25px; padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; display: none; }
-        .details-card h3 { margin: 0 0 15px 0; color: #1e293b; text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #475569; }
-        .data-row span:last-child { font-weight: 600; color: #0f172a; }
-        .highlight { background: #fee2e2; padding: 10px; border-radius: 8px; color: #b91c1c; margin-top: 15px; font-size: 16px; font-weight: bold; }
-        
-        .eating-log-box { background: #fffbeb; padding: 15px; border-radius: 12px; border: 1px solid #fde68a; display: none; margin-top: 15px; }
-        .eating-log-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; border-bottom: 1px dashed #fcd34d; padding-bottom: 5px; }
+        .autocomplete-container { position: relative; width: 100%; }
+        .autocomplete-items { position: absolute; border: 1px solid #cbd5e1; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 180px; overflow-y: auto; }
+        .autocomplete-items:empty { display: none; }
+        .autocomplete-items div { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
+        .autocomplete-items div:hover { background-color: #f0fdfa; color: #0d9488; font-weight: bold; }
+
+        .doc-list { margin-top: 15px; }
+        .doc-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+        .doc-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #334155; margin-bottom: 4px; }
+        .doc-num { font-size: 13px; color: #64748b; font-family: monospace; margin-bottom: 10px; }
+        .doc-actions { display: flex; gap: 10px; }
+        .doc-actions button { padding: 8px; font-size: 13px; font-weight: 600; }
+        .btn-view { background: #475569; } .btn-view:hover { background: #334155; }
+
+        .loan-stat { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: #475569; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; }
+        .loan-stat span:last-child { font-weight: bold; color: #1e293b; }
+
+        /* Chart constraints for clean mobile viewport scaling */
+        .chart-wrapper { position: relative; width: 100%; height: 180px; margin: 15px auto 0 auto; }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { width: 100%; max-width: 400px; border-radius: 8px; background: white; padding: 15px; }
+        .modal-content img { max-width: 100%; max-height: 60vh; display: block; margin: 0 auto; object-fit: contain; }
+        .modal-close { width: 100%; margin-top: 12px; background: #ef4444; }
 
         .admin-link { text-align: center; padding: 15px; background: #f1f5f9; width: 100%; }
         .admin-link a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; }
@@ -41,58 +57,59 @@
 
 <div class="app-container">
     <div class="header">
-        <h2>Worker Search Portal</h2>
+        <h2>Document Vault & Loan</h2>
     </div>
     
     <div class="content">
-        <div class="input-group">
-            <label>Search by Name:</label>
+        <!-- SECTION 1: DOCUMENT VAULT SEARCH (REORDERED SEARCH FIELD OPTIONS) -->
+        <div class="section-card">
+            <div class="section-title">📂 Document Section 1</div>
+            
+            <label>1. Select Document Type:</label>
+            <select id="searchCategory">
+                <option value="Aadhar">Aadhar Card</option>
+                <option value="Voter">Voter ID Card</option>
+                <option value="Bank">Bank Account</option>
+                <option value="Other">Other Document</option>
+            </select>
+
+            <label>2. Search Holder Name:</label>
             <div class="autocomplete-container">
-                <input type="text" id="searchName" placeholder="Start typing a name..." autocomplete="off">
+                <input type="text" id="searchName" placeholder="Type holder name..." autocomplete="off">
                 <div id="searchNameList" class="autocomplete-items"></div>
             </div>
-        </div>
-        <div class="input-group">
-            <label>Select Month & Year:</label>
-            <input type="month" id="searchMonth">
-        </div>
-        <button id="searchBtn">Load Work Details</button>
 
-        <div class="details-card" id="resultCard">
-            <h3><span id="displayName">...</span></h3>
-            <div class="data-row"><span>Month:</span> <span id="displayMonth">...</span></div>
-            <div class="data-row"><span>Working Days:</span> <span id="displayDays">0</span></div>
-            <div class="data-row"><span>Daily Rate:</span> <span>₹<span id="displayDaily">0</span></span></div>
-            <div class="data-row"><span>Extra Hours:</span> <span id="displayExtraHrs">0</span></div>
-            <div class="data-row"><span>Extra Rate Pay:</span> <span>₹<span id="displayExtraPay">0</span></span></div>
-            <div style="border-top: 1px solid #ccc; margin: 10px 0;"></div>
-            <div class="data-row"><span>Manual Expenses:</span> <span>₹<span id="displayExpense">0</span></span></div>
-            <div class="data-row"><span>Shared Eating Deductions:</span> <span style="color: #d97706;">₹<span id="displayEating">0</span></span></div>
-            <div class="data-row"><span>Amount Already Paid:</span> <span style="color:#059669;">₹<span id="displayPaid">0</span></span></div>
-            <div class="data-row highlight"><span>Current Due Amount:</span> <span>₹<span id="displayDue">0</span></span></div>
+            <button id="searchBtn" style="margin-top: 5px;">Search Credentials</button>
+            <div class="doc-list" id="vaultResults"></div>
         </div>
 
-        <div style="border-top: 2px solid #e2e8f0; margin: 30px 0 20px 0;"></div>
-
-        <div class="input-group">
-            <label style="color: #d97706;">🍔 View Shared Eating Costs:</label>
-            <input type="month" id="eatingSearchMonth">
-            <button id="eatingSearchBtn" style="background: #f59e0b; margin-top: 10px;">Load Eating Costs</button>
-        </div>
-        
-        <div class="eating-log-box" id="eatingCostResult">
-            <h4 style="margin: 0 0 10px 0; color: #b45309; text-align: center;">Food Expense Log</h4>
-            <div id="eatingCostList"></div>
-            <div style="border-top: 2px solid #fcd34d; margin-top: 10px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: bold; color: #92400e;">
-                <span>Total for Month:</span>
-                <span>₹<span id="eatingTotalMonth">0</span></span>
+        <!-- SECTION 2: BANDHAN BANK LOAN TRACKER (WITH LIVE DYNAMIC NEXT MONDAY GENERATOR) -->
+        <div class="section-card">
+            <div class="section-title">🏦 Loan Tracking Metrics</div>
+            <div class="loan-stat"><span>CIF Number:</span> <span style="font-family: monospace; font-size:15px;">321849969</span></div>
+            <div class="loan-stat"><span>Remaining Weekly EMIs:</span> <span id="lblEmis" style="color:#b91c1c; font-size:16px;">Loading...</span></div>
+            <div class="loan-stat"><span>Payment Schedule:</span> <span>Every Monday</span></div>
+            <div class="loan-stat"><span>Next Monday Due Date:</span> <span id="lblNextMonday" style="color:#b45309;">Calculating...</span></div>
+            <div class="loan-stat"><span>Maturity Close Date:</span> <span style="color:#0d9488;">14 Jun 2027</span></div>
+            
+            <div class="chart-wrapper">
+                <canvas id="emiChart"></canvas>
             </div>
-        </div>
 
+            <a href="https://pay.bandhan.bank.in/" target="_blank" class="btn-pay-online">💳 Pay Online Portal</a>
+        </div>
     </div>
     
     <div class="admin-link">
         <a href="admin.html">🔒 Admin Portal Login</a>
+    </div>
+</div>
+
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div id="pdfWarning" style="display:none; color:#ef4444; font-weight:bold; margin-bottom:10px; text-align:center; font-size:13px;">PDF preview container active. Use download if display defaults.</div>
+        <div id="mediaContainer"></div>
+        <button class="modal-close" id="closeModalBtn">Close Preview</button>
     </div>
 </div>
 
@@ -101,7 +118,7 @@
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
-    const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
   authDomain: "worker-manager-7d563.firebaseapp.com",
   projectId: "worker-manager-7d563",
@@ -113,107 +130,154 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let workerNamesArray = [];
-    async function loadNamesForSuggest() {
-        const snap = await getDocs(collection(db, "workers"));
-        snap.forEach(doc => workerNamesArray.push(doc.data().name));
+    let vaultNamesArray = [];
+    async function fetchActiveNames() {
+        const snap = await getDocs(collection(db, "vault_documents"));
+        snap.forEach(doc => {
+            if(!vaultNamesArray.includes(doc.data().name)) vaultNamesArray.push(doc.data().name);
+        });
     }
-    loadNamesForSuggest();
+    fetchActiveNames();
 
     const searchInput = document.getElementById('searchName');
     const searchList = document.getElementById('searchNameList');
 
     searchInput.addEventListener('input', function() {
         const val = this.value.toLowerCase();
-        searchList.innerHTML = '';
-        if (!val) return;
-        const matches = workerNamesArray.filter(name => name.toLowerCase().includes(val));
+        searchList.innerHTML = ''; if (!val) return;
+        const matches = vaultNamesArray.filter(name => name.toLowerCase().includes(val));
         matches.forEach(match => {
             const div = document.createElement('div');
             div.innerText = match;
-            div.addEventListener('click', function() {
-                searchInput.value = match;
-                searchList.innerHTML = '';
-            });
+            div.addEventListener('click', function() { searchInput.value = match; searchList.innerHTML = ''; });
             searchList.appendChild(div);
         });
     });
+    document.addEventListener('click', (e) => { if (e.target !== searchInput) searchList.innerHTML = ''; });
 
-    document.addEventListener('click', function(e) { if (e.target !== searchInput) searchList.innerHTML = ''; });
-
-    // Original Search Logic + Eating Deductions
-    document.getElementById('searchBtn').addEventListener('click', async () => {
-        const nameInput = document.getElementById('searchName').value.trim();
-        const monthInput = document.getElementById('searchMonth').value;
-        const resultCard = document.getElementById('resultCard');
-        if (!nameInput || !monthInput) return alert("Enter name and month!");
-
-        try {
-            const workerQuery = query(collection(db, "workers"), where("name", "==", nameInput));
-            const workerSnap = await getDocs(workerQuery);
-            if (workerSnap.empty) { resultCard.style.display = 'none'; return alert("Worker not found!"); }
-            const workerData = workerSnap.docs[0].data();
-            
-            const attQuery = query(collection(db, "attendance_records"), where("name", "==", nameInput), where("month", "==", monthInput));
-            const attSnap = await getDocs(attQuery);
-            if (attSnap.empty) { resultCard.style.display = 'none'; return alert("No records for this month!"); }
-            const monthData = attSnap.docs[0].data();
-
-            const daily = Number(workerData.daily_salary) || 0;
-            const exRate = Number(workerData.extra_hour_rate) || 0;
-            const days = Number(monthData.working_days) || 0;
-            const exHrs = Number(monthData.extra_hours) || 0;
-            const exp = Number(monthData.expense) || 0;
-            const paid = Number(monthData.paid) || 0;
-            const eating = Number(monthData.eating_expense) || 0; // NEW!
-
-            const exPay = exHrs * exRate;
-            const total = (days * daily) + exPay;
-            const due = total - exp - paid - eating; // Math updated!
-
-            document.getElementById('displayName').innerText = nameInput;
-            document.getElementById('displayMonth').innerText = monthInput;
-            document.getElementById('displayDays').innerText = days;
-            document.getElementById('displayDaily').innerText = daily;
-            document.getElementById('displayExtraHrs').innerText = exHrs;
-            document.getElementById('displayExtraPay').innerText = exPay;
-            document.getElementById('displayExpense').innerText = exp;
-            document.getElementById('displayEating').innerText = eating.toFixed(2);
-            document.getElementById('displayPaid').innerText = paid;
-            document.getElementById('displayDue').innerText = due.toFixed(2);
-
-            resultCard.style.display = 'block';
-        } catch (error) { alert("Error: " + error.message); }
-    });
-
-    // NEW: Eating Cost Log Fetcher
-    document.getElementById('eatingSearchBtn').addEventListener('click', async () => {
-        const monthInput = document.getElementById('eatingSearchMonth').value;
-        if(!monthInput) return alert("Please select a month!");
+    // Binary blob stream array processing fix for seamless multi-platform downloads
+    function executeBlobBinaryDownload(base64RawString, outputFileName) {
+        const chunks = base64RawString.split(';base64,');
+        const formatType = chunks[0].split(':')[1];
+        const binaryStream = window.atob(chunks[1]);
+        const streamLen = binaryStream.length;
+        const bufferMap = new Uint8Array(streamLen);
         
-        const q = query(collection(db, "eating_costs"), where("month", "==", monthInput));
-        const snap = await getDocs(q);
-        
-        const listDiv = document.getElementById('eatingCostList');
-        listDiv.innerHTML = '';
-        let total = 0;
-        
-        if(snap.empty) {
-            listDiv.innerHTML = '<p style="text-align:center; color:#92400e;">No shared eating costs recorded for this month.</p>';
-        } else {
-            snap.forEach(doc => {
-                const d = doc.data();
-                total += Number(d.total_amount);
-                listDiv.innerHTML += `
-                    <div class="eating-log-item">
-                        <span>📅 ${d.date}</span>
-                        <span>₹${d.total_amount} <small style="color:#b45309;">(₹${d.split_amount.toFixed(1)}/ea)</small></span>
-                    </div>`;
-            });
+        for (let idx = 0; idx < streamLen; idx++) {
+            bufferMap[idx] = binaryStream.charCodeAt(idx);
         }
-        document.getElementById('eatingTotalMonth').innerText = total;
-        document.getElementById('eatingCostResult').style.display = 'block';
+        
+        const blobObj = new Blob([bufferMap], { type: formatType });
+        const dataUrl = URL.createObjectURL(blobObj);
+        const anchorNode = document.createElement('a');
+        
+        anchorNode.href = dataUrl;
+        anchorNode.download = outputFileName;
+        document.body.appendChild(anchorNode);
+        anchorNode.click();
+        
+        document.body.removeChild(anchorNode);
+        URL.revokeObjectURL(dataUrl);
+    }
+
+    // Dynamic filtering matching based on explicit target sub-category configuration criteria
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+        const targetName = searchInput.value.trim();
+        const selectedCategory = document.getElementById('searchCategory').value;
+        const resultsDiv = document.getElementById('vaultResults');
+        resultsDiv.innerHTML = '';
+        if(!targetName) return alert("Please specify a search name!");
+
+        const q = query(collection(db, "vault_documents"), where("name", "==", targetName), where("doc_category", "==", selectedCategory));
+        const snap = await getDocs(q);
+
+        if(snap.empty) {
+            resultsDiv.innerHTML = '<p style="text-align:center; color:#64748b; font-size:14px;">No files found matching criteria under this profile.</p>';
+            return;
+        }
+
+        snap.forEach(docSnap => {
+            const d = docSnap.data();
+            const item = document.createElement('div');
+            item.className = 'doc-item';
+            item.innerHTML = `
+                <div class="doc-meta"><span>💳 ${d.card_type}</span></div>
+                <div class="doc-num">ID reference: ${d.card_number}</div>
+                <div class="doc-actions">
+                    <button class="btn-view" data-base64="${d.file_base64}">View Card</button>
+                    <button class="btn-green" data-name="${d.card_type}" data-base64="${d.file_base64}" data-num="${d.card_number}">Download Card</button>
+                </div>`;
+            resultsDiv.appendChild(item);
+        });
+
+        document.querySelectorAll('.btn-view').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const b64 = e.target.getAttribute('data-base64');
+                const container = document.getElementById('mediaContainer');
+                document.getElementById('pdfWarning').style.display = b64.includes('application/pdf') ? 'block' : 'none';
+                
+                container.innerHTML = b64.includes('application/pdf') 
+                    ? `<iframe src="${b64}" style="width:100%; height:50vh; border:none;"></iframe>`
+                    : `<img src="${b64}">`;
+                document.getElementById('viewModal').style.display = 'flex';
+            });
+        });
+
+        document.querySelectorAll('.btn-green').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const rawB64 = e.target.getAttribute('data-base64');
+                const titleStr = e.target.getAttribute('data-name').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const numStr = e.target.getAttribute('data-num');
+                const extension = rawB64.includes('application/pdf') ? 'pdf' : 'jpg';
+                
+                executeBlobBinaryDownload(rawB64, `${titleStr}_${numStr}.${extension}`);
+            });
+        });
     });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => { document.getElementById('viewModal').style.display = 'none'; });
+
+    // Automatic upcoming Monday calendar mapping logic engine
+    function calculateUpcomingMondayDate() {
+        const currentCalendarDate = new Date();
+        const currentDayOfWeek = currentCalendarDate.getDay();
+        const shiftsNeeded = (1 - currentDayOfWeek + 7) % 7 || 7;
+        currentCalendarDate.setDate(currentCalendarDate.getDate() + shiftsNeeded);
+        return currentCalendarDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    document.getElementById('lblNextMonday').innerText = calculateUpcomingMondayDate();
+
+    async function initLoanTrackerGraph() {
+        const snap = await getDocs(collection(db, "loan_status"));
+        let remainingEmis = 40;
+        if(!snap.empty) remainingEmis = Number(snap.docs[0].data().remaining_emis) || 0;
+        
+        document.getElementById('lblEmis').innerText = remainingEmis + " Weeks";
+
+        const ctx = document.getElementById('emiChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Start', 'Current Status', 'Target Clear'],
+                datasets: [{
+                    data: [40, remainingEmis, 0],
+                    borderColor: '#0d9488',
+                    backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.25,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, max: 40, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+            }
+        });
+    }
+    initLoanTrackerGraph();
 </script>
 </body>
 </html>
