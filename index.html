@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Document Vault & Loan Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js link removed to make the page load faster -->
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f8fafc; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -41,8 +41,10 @@
         .loan-stat { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: #475569; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; }
         .loan-stat span:last-child { font-weight: bold; color: #1e293b; }
 
-        /* Chart constraints for clean mobile viewport scaling */
-        .chart-wrapper { position: relative; width: 100%; height: 180px; margin: 15px auto 0 auto; }
+        /* 🔴 NEW: HELPLINE BOX STYLES 🔴 */
+        .helpline-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 10px; color: #475569; border-bottom: 1px dashed #fca5a5; padding-bottom: 8px; }
+        .helpline-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .helpline-item span:last-child { font-weight: bold; color: #ef4444; font-size: 18px; font-family: monospace; }
 
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; padding: 20px; }
         .modal-content { width: 100%; max-width: 400px; border-radius: 8px; background: white; padding: 15px; }
@@ -51,9 +53,22 @@
 
         .admin-link { text-align: center; padding: 15px; background: #f1f5f9; width: 100%; }
         .admin-link a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; }
+
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .auth-box { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
+
+<div id="passwordOverlay" class="auth-overlay">
+    <div class="auth-box">
+        <h2 style="margin-top: 0; color: #1e3a8a;">Vault Access</h2>
+        <p style="font-size: 14px; color: #475569; margin-bottom: 20px;">Please enter the secure passphrase to access this portal.</p>
+        <input type="password" id="vaultPassword" placeholder="Enter Passphrase">
+        <button id="authBtn" style="background: #1e3a8a;">Unlock Vault</button>
+        <p id="authError" style="color: #ef4444; font-size: 13px; display: none; margin-top: 10px;">Incorrect passphrase. Access denied.</p>
+    </div>
+</div>
 
 <div class="app-container">
     <div class="header">
@@ -61,7 +76,7 @@
     </div>
     
     <div class="content">
-        <!-- SECTION 1: DOCUMENT VAULT SEARCH (REORDERED SEARCH FIELD OPTIONS) -->
+        <!-- SECTION 1: DOCUMENT VAULT SEARCH -->
         <div class="section-card">
             <div class="section-title">📂 Document Section 1</div>
             
@@ -83,7 +98,7 @@
             <div class="doc-list" id="vaultResults"></div>
         </div>
 
-        <!-- SECTION 2: BANDHAN BANK LOAN TRACKER (WITH LIVE DYNAMIC NEXT MONDAY GENERATOR) -->
+        <!-- SECTION 2: BANDHAN BANK LOAN TRACKER -->
         <div class="section-card">
             <div class="section-title">🏦 Loan Tracking Metrics</div>
             <div class="loan-stat"><span>CIF Number:</span> <span style="font-family: monospace; font-size:15px;">321849969</span></div>
@@ -92,11 +107,33 @@
             <div class="loan-stat"><span>Next Monday Due Date:</span> <span id="lblNextMonday" style="color:#b45309;">Calculating...</span></div>
             <div class="loan-stat"><span>Maturity Close Date:</span> <span style="color:#0d9488;">14 Jun 2027</span></div>
             
-            <div class="chart-wrapper">
-                <canvas id="emiChart"></canvas>
-            </div>
-
             <a href="https://pay.bandhan.bank.in/" target="_blank" class="btn-pay-online">💳 Pay Online Portal</a>
+        </div>
+
+        <!-- 🔴 NEW: SECTION 3 - HELPLINES 🔴 -->
+        <div class="section-card" style="border-left: 4px solid #ef4444; background: #fef2f2;">
+            <div class="section-title" style="color: #b91c1c;">🚨 Primary & Centralized Helplines</div>
+            
+            <div class="helpline-item">
+                <span>National Emergency Number:</span>
+                <span>112</span>
+            </div>
+            <div class="helpline-item">
+                <span>Police Helpline:</span>
+                <span>100</span>
+            </div>
+            <div class="helpline-item">
+                <span>Fire Brigade:</span>
+                <span>101</span>
+            </div>
+            <div class="helpline-item">
+                <span>National Ambulance Service:</span>
+                <span>102</span>
+            </div>
+            <div class="helpline-item">
+                <span>Emergency Medical/Trauma:</span>
+                <span>108</span>
+            </div>
         </div>
     </div>
     
@@ -118,7 +155,7 @@
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
-   const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
   authDomain: "worker-manager-7d563.firebaseapp.com",
   projectId: "worker-manager-7d563",
@@ -129,6 +166,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    document.getElementById('authBtn').addEventListener('click', () => {
+        const pass = document.getElementById('vaultPassword').value;
+        if(pass === "Personaldocs@@") {
+            document.getElementById('passwordOverlay').style.display = 'none';
+        } else {
+            document.getElementById('authError').style.display = 'block';
+        }
+    });
 
     let vaultNamesArray = [];
     async function fetchActiveNames() {
@@ -155,7 +201,6 @@
     });
     document.addEventListener('click', (e) => { if (e.target !== searchInput) searchList.innerHTML = ''; });
 
-    // Binary blob stream array processing fix for seamless multi-platform downloads
     function executeBlobBinaryDownload(base64RawString, outputFileName) {
         const chunks = base64RawString.split(';base64,');
         const formatType = chunks[0].split(':')[1];
@@ -180,7 +225,6 @@
         URL.revokeObjectURL(dataUrl);
     }
 
-    // Dynamic filtering matching based on explicit target sub-category configuration criteria
     document.getElementById('searchBtn').addEventListener('click', async () => {
         const targetName = searchInput.value.trim();
         const selectedCategory = document.getElementById('searchCategory').value;
@@ -205,7 +249,7 @@
                 <div class="doc-num">ID reference: ${d.card_number}</div>
                 <div class="doc-actions">
                     <button class="btn-view" data-base64="${d.file_base64}">View Card</button>
-                    <button class="btn-green" data-name="${d.card_type}" data-base64="${d.file_base64}" data-num="${d.card_number}">Download Card</button>
+                    <button class="btn-green" style="background:#0d9488;" data-name="${d.card_type}" data-base64="${d.file_base64}" data-num="${d.card_number}">Download Card</button>
                 </div>`;
             resultsDiv.appendChild(item);
         });
@@ -237,7 +281,6 @@
 
     document.getElementById('closeModalBtn').addEventListener('click', () => { document.getElementById('viewModal').style.display = 'none'; });
 
-    // Automatic upcoming Monday calendar mapping logic engine
     function calculateUpcomingMondayDate() {
         const currentCalendarDate = new Date();
         const currentDayOfWeek = currentCalendarDate.getDay();
@@ -247,37 +290,14 @@
     }
     document.getElementById('lblNextMonday').innerText = calculateUpcomingMondayDate();
 
-    async function initLoanTrackerGraph() {
+    // Graphic Chart Logic Removed - Loading only the text numbers now
+    async function initLoanTracker() {
         const snap = await getDocs(collection(db, "loan_status"));
         let remainingEmis = 40;
         if(!snap.empty) remainingEmis = Number(snap.docs[0].data().remaining_emis) || 0;
-        
         document.getElementById('lblEmis').innerText = remainingEmis + " Weeks";
-
-        const ctx = document.getElementById('emiChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Start', 'Current Status', 'Target Clear'],
-                datasets: [{
-                    data: [40, remainingEmis, 0],
-                    borderColor: '#0d9488',
-                    backgroundColor: 'rgba(13, 148, 136, 0.08)',
-                    borderWidth: 2.5,
-                    fill: true,
-                    tension: 0.25,
-                    pointRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, max: 40, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-            }
-        });
     }
-    initLoanTrackerGraph();
+    initLoanTracker();
 </script>
 </body>
 </html>
