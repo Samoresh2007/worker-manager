@@ -3,130 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Dashboard</title>
+    <title>Admin System Panel</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f1f5f9; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        body { background-color: #f1f5f9; margin: 0; padding: 15px; }
+        .container { max-width: 550px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2, h3 { color: #1e293b; margin-top: 0; }
         .section-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         label { font-weight: 600; font-size: 13px; color: #475569; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px; font-size: 15px; outline: none; }
-        input:focus { border-color: #3b82f6; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px; font-size: 15px; outline: none; background: white; }
+        input:focus, select:focus { border-color: #0d9488; }
         button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; color: white; transition: 0.2s; }
-        .btn-green { background: #10b981; } .btn-green:hover { background: #059669; }
+        .btn-teal { background: #0d9488; } .btn-teal:hover { background: #0f766e; }
         .btn-blue { background: #3b82f6; } .btn-blue:hover { background: #2563eb; }
         .btn-red { background: #ef4444; } .btn-red:hover { background: #dc2626; }
-        .btn-orange { background: #f59e0b; } .btn-orange:hover { background: #d97706; }
         .btn-logout { background: #64748b; margin-bottom: 20px; }
         
         .autocomplete-container { position: relative; width: 100%; }
         .autocomplete-items { position: absolute; border: 1px solid #cbd5e1; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 6px 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 150px; overflow-y: auto; }
         .autocomplete-items:empty { display: none; }
-        .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #333; }
-        .autocomplete-items div:hover { background-color: #eff6ff; color: #2563eb; font-weight: bold; }
+        .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .autocomplete-items div:hover { background-color: #f0fdfa; color: #0d9488; font-weight: bold; }
 
-        .worker-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
-        .action-btns button { width: auto; padding: 6px 12px; margin-left: 5px; font-size: 12px; }
-        
+        .slider-box { display: flex; align-items: center; gap: 15px; background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .slider-box input { margin-bottom: 0; cursor: pointer; }
+
+        .record-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
         #dashboardSection { display: none; }
-        .hidden-edit-id { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- LOGIN -->
     <div id="loginSection">
-        <h2>Admin Portal Security</h2>
+        <h2>Admin Authentication</h2>
         <label>Admin Email:</label>
         <input type="email" id="loginEmail" placeholder="admin@domain.com">
         <label>Password:</label>
         <input type="password" id="loginPassword" placeholder="••••••••">
-        <button class="btn-blue" id="loginBtn">Authenticate</button>
-        <p id="loginError" style="color:red; display:none; font-size: 13px; text-align: center;">Access Denied.</p>
+        <button class="btn-teal" id="loginBtn">Unlock Workspace</button>
+        <p id="loginError" style="color:red; display:none; font-size: 13px; text-align: center;">Invalid admin access credentials.</p>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="dashboardSection">
-        <h2>Control Panel</h2>
-        <button class="btn-logout" id="logoutBtn">Lock Session (Logout)</button>
+        <h2>Workspace Dashboard</h2>
+        <button class="btn-logout" id="logoutBtn">Lock Console Session</button>
 
-        <!-- 1. DISTRIBUTE EATING COST (WITH NEW UNDO FEATURE) -->
-        <div class="section-box" style="border-left: 4px solid #f59e0b; background: #fffbeb;">
-            <h3 style="color: #b45309;">🍔 Distribute Shared Eating Cost</h3>
-            <p style="font-size: 12px; color: #92400e; margin-top: -10px;">Splits this cost equally and deducts from all active workers automatically.</p>
+        <!-- 1. DYNAMIC DOCUMENT REGISTRY SYSTEM WITH EXTRA INPUT FIELDS FOR CLASSIFICATION -->
+        <div class="section-box" style="border-left: 4px solid #0d9488;">
+            <h3>📤 Upload Vault Document</h3>
+            <label>Holder Name:</label>
+            <div class="autocomplete-container">
+                <input type="text" id="docName" autocomplete="off" placeholder="e.g. Swapan Dey">
+                <div id="docNameList" class="autocomplete-items"></div>
+            </div>
+
+            <label>Card Classification Category:</label>
+            <select id="docCardType">
+                <option value="Aadhar">Aadhar Card</option>
+                <option value="Voter">Voter ID Card</option>
+                <option value="Bank">Bank Account</option>
+                <option value="Other">Other Document</option>
+            </select>
+
+            <!-- Conditional Display field block inputs -->
+            <div id="bankSelectionWrapper" style="display: none;">
+                <label>Specify Bank Name:</label>
+                <input type="text" id="txtBankSelectorName" placeholder="e.g. State Bank of India">
+            </div>
+
+            <div id="customDocSelectionWrapper" style="display: none;">
+                <label>Specify Document Custom Label Name:</label>
+                <input type="text" id="txtCustomDocLabel" placeholder="e.g. Driving License / Pan Card">
+            </div>
+
+            <label>Card / Account Identification Number:</label>
+            <input type="text" id="docNumber" placeholder="Enter Unique ID/Acc Code">
+
+            <label>Select Digital Attachment (JPG / PNG / PDF):</label>
+            <input type="file" id="docFile" accept="image/*,application/pdf">
+
+            <label>Edit KB Quality (Image Size Tuning):</label>
+            <div class="slider-box">
+                <input type="range" id="kbCompressorSlider" min="10" max="100" value="60">
+                <span id="lblKbValue" style="font-weight: bold; font-size: 14px; color:#0d9488;">60%</span>
+            </div>
             
-            <label>Date of Food Purchase:</label>
-            <input type="date" id="eatingDate">
-            <label>Total Amount Spent (₹):</label>
-            <input type="number" id="eatingAmount" placeholder="e.g. 500">
-            <button class="btn-orange" id="eatingBtn">Split & Distribute to All</button>
-
-            <!-- 🔴 NEW: UNDO MISTAKE SECTION 🔴 -->
-            <div style="margin-top: 25px; border-top: 1px dashed #fcd34d; padding-top: 15px;">
-                <label style="color: #b45309;">Undo a Mistake (Select Month):</label>
-                <div style="display:flex; gap:10px;">
-                    <input type="month" id="undoEatingMonth" style="margin-bottom:0;">
-                    <button class="btn-orange" id="loadUndoEatingBtn" style="width:auto; padding: 10px 20px;">Load</button>
-                </div>
-                <div id="undoEatingList" style="margin-top: 15px;"></div>
-            </div>
+            <button class="btn-teal" id="uploadBtn">Process & Store To Vault</button>
         </div>
 
-        <!-- 2. MAKE A PAYMENT -->
-        <div class="section-box" style="border-left: 4px solid #10b981;">
-            <h3>💳 Issue Direct Payment</h3>
-            <label>Worker Name:</label>
-            <div class="autocomplete-container">
-                <input type="text" id="payName" autocomplete="off" placeholder="Start typing name...">
-                <div id="payNameList" class="autocomplete-items"></div>
-            </div>
-            <label>Payment Date:</label>
-            <input type="date" id="payDate">
-            <label>Amount to Pay (₹):</label>
-            <input type="number" id="payAmount">
-            <button class="btn-green" id="payBtn">Submit Payment</button>
+        <!-- 2. TRACKING ADJUSTMENTS - WITH ONE-CLICK AUTO WEEKEMI DECREMENT SYSTEM -->
+        <div class="section-box" style="border-left: 4px solid #3b82f6; background:#eff6ff;">
+            <h3 style="color:#1d4ed8;">📉 Process Active EMI Payment</h3>
+            <p style="font-size: 12px; color:#1e40af; margin-top:-10px; margin-bottom:15px;">Clicking this button automatically deducts 1 week from your outstanding EMI totals down to 48, 47, etc.</p>
+            <button class="btn-blue" id="btnQuickEMIDeduct" style="background:#1d4ed8;">Record Weekly Paid EMI (-1 Week)</button>
+            
+            <div style="border-top: 1.5px dashed #bfdbfe; margin:20px 0 15px 0;"></div>
+            
+            <label>Or Manually Override Remaining EMI Count:</label>
+            <input type="number" id="txtAdminEmis" placeholder="Change specific week count number manually">
+            <button class="btn-blue" id="updateLoanBtn">Commit Manual Overwrite</button>
         </div>
 
-        <!-- 3. MONTHLY DATA ENTRY -->
-        <div class="section-box" style="border-left: 4px solid #3b82f6;">
-            <h3>📅 Input Monthly Work Record</h3>
-            <label>Worker Name:</label>
-            <div class="autocomplete-container">
-                <input type="text" id="dataName" autocomplete="off" placeholder="Start typing name...">
-                <div id="dataNameList" class="autocomplete-items"></div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <div style="width:50%;"><label>Billing Month:</label><input type="month" id="dataMonth"></div>
-                <div style="width:50%;"><label>Days Worked:</label><input type="number" id="dataDays"></div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <div style="width:50%;"><label>Extra Hours:</label><input type="number" id="dataExtraHrs" value="0"></div>
-                <div style="width:50%;"><label>Manual Exp (₹):</label><input type="number" id="dataExpense" value="0"></div>
-            </div>
-            <label>Initial Payment Given (₹):</label>
-            <input type="number" id="dataPaid" value="0">
-            <button class="btn-blue" id="saveDataBtn">Save Monthly Record</button>
-        </div>
-
-        <!-- 4. ADD / EDIT WORKER -->
-        <div class="section-box" style="border-left: 4px solid #8b5cf6;">
-            <h3 id="formTitle">👤 Add / Edit Worker</h3>
-            <input type="text" id="editWorkerId" class="hidden-edit-id">
-            <label>Name:</label>
-            <input type="text" id="newWorkerName">
-            <label>Type:</label>
-            <select id="newWorkerType"><option value="Mistri">Mistri</option><option value="Labour">Labour</option></select>
-            <div style="display: flex; gap: 10px;">
-                <div style="width:50%;"><label>Daily Rate:</label><input type="number" id="newWorkerSalary"></div>
-                <div style="width:50%;"><label>Extra Hr Rate:</label><input type="number" id="newWorkerExtraRate"></div>
-            </div>
-            <button class="btn-blue" id="addWorkerBtn" style="background:#8b5cf6;">Save Worker Profile</button>
-        </div>
-
-        <!-- 5. MANAGE WORKERS LIST -->
+        <!-- 3. ATTACHMENT ENTRIES REMOVAL DISPLAY ROSTER -->
         <div class="section-box">
-            <h3>⚙️ Manage Roster</h3>
-            <div id="workerListContainer"></div>
+            <h3>⚙️ Active Repository Indexes</h3>
+            <div id="vaultRosterList"></div>
         </div>
 
     </div>
@@ -135,10 +119,10 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
-   const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyDDMlYKDvkjmmdbA8-bFzOeik4q0q-bfEI",
   authDomain: "worker-manager-7d563.firebaseapp.com",
   projectId: "worker-manager-7d563",
@@ -150,190 +134,184 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let adminWorkerNamesArray = [];
+    let adminNamesAutocompleteList = [];
 
-    function setupAutocomplete(inputId, listId) {
-        const input = document.getElementById(inputId);
-        const list = document.getElementById(listId);
-        input.addEventListener('input', function() {
+    function registerAutocomplete(inputId, dropdownId) {
+        const inp = document.getElementById(inputId);
+        const list = document.getElementById(dropdownId);
+        inp.addEventListener('input', function() {
             const val = this.value.toLowerCase();
-            list.innerHTML = '';
-            if (!val) return;
-            const matches = adminWorkerNamesArray.filter(name => name.toLowerCase().includes(val));
+            list.innerHTML = ''; if(!val) return;
+            const matches = adminNamesAutocompleteList.filter(name => name.toLowerCase().includes(val));
             matches.forEach(match => {
-                const div = document.createElement('div');
-                div.innerText = match;
-                div.addEventListener('click', function() { input.value = match; list.innerHTML = ''; });
-                list.appendChild(div);
+                const item = document.createElement('div');
+                item.innerText = match;
+                item.addEventListener('click', () => { inp.value = match; list.innerHTML = ''; });
+                list.appendChild(item);
             });
         });
-        document.addEventListener('click', function(e) { if (e.target !== input) list.innerHTML = ''; });
+        document.addEventListener('click', (e) => { if(e.target !== inp) list.innerHTML = ''; });
     }
+    registerAutocomplete('docName', 'docNameList');
 
-    setupAutocomplete('payName', 'payNameList');
-    setupAutocomplete('dataName', 'dataNameList');
+    // Dynamic visibility UI logic configurations matching subfield input forms
+    const docCardTypeSelector = document.getElementById('docCardType');
+    docCardTypeSelector.addEventListener('change', function() {
+        document.getElementById('bankSelectionWrapper').style.display = (this.value === 'Bank') ? 'block' : 'none';
+        document.getElementById('customDocSelectionWrapper').style.display = (this.value === 'Other') ? 'block' : 'none';
+    });
+
+    const slider = document.getElementById('kbCompressorSlider');
+    slider.addEventListener('input', (e) => { document.getElementById('lblKbValue').innerText = e.target.value + "%"; });
 
     onAuthStateChanged(auth, (user) => {
-        if (user) { document.getElementById('loginSection').style.display = 'none'; document.getElementById('dashboardSection').style.display = 'block'; loadWorkersList(); } 
-        else { document.getElementById('loginSection').style.display = 'block'; document.getElementById('dashboardSection').style.display = 'none'; }
+        if (user) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            loadActiveDocumentsIndex();
+        } else {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').style.display = 'none';
+        }
     });
-    document.getElementById('loginBtn').addEventListener('click', () => { signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(() => document.getElementById('loginError').style.display = 'block'); });
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
+            .catch(() => document.getElementById('loginError').style.display = 'block');
+    });
     document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-    async function loadWorkersList() {
-        const container = document.getElementById('workerListContainer');
-        container.innerHTML = ''; adminWorkerNamesArray = []; 
-        const snap = await getDocs(collection(db, "workers"));
-        snap.forEach(documentSnap => {
-            const data = documentSnap.data(); const id = documentSnap.id;
-            adminWorkerNamesArray.push(data.name);
-            const div = document.createElement('div'); div.className = 'worker-item';
-            div.innerHTML = `<strong>${data.name}</strong> (${data.type})
-                <div class="action-btns"><button class="btn-blue edit-btn" data-id="${id}" data-name="${data.name}" data-type="${data.type}" data-sal="${data.daily_salary}" data-ex="${data.extra_hour_rate}">Edit</button><button class="btn-red del-btn" data-id="${id}">Del</button></div>`;
-            container.appendChild(div);
+    async function loadActiveDocumentsIndex() {
+        const container = document.getElementById('vaultRosterList');
+        container.innerHTML = ''; adminNamesAutocompleteList = [];
+        
+        const snap = await getDocs(collection(db, "vault_documents"));
+        snap.forEach(docSnapshot => {
+            const d = docSnapshot.data();
+            const docId = docSnapshot.id;
+            if(!adminNamesAutocompleteList.includes(d.name)) adminNamesAutocompleteList.push(d.name);
+
+            const row = document.createElement('div');
+            row.className = 'record-item';
+            row.innerHTML = `
+                <div><b>${d.name}</b> - ${d.card_type} (<small>${d.card_number}</small>)</div>
+                <button class="btn-red del-doc-btn" style="width:auto; padding:6px 12px; font-size:12px;" data-id="${docId}">Remove</button>
+            `;
+            container.appendChild(row);
         });
-        document.querySelectorAll('.del-btn').forEach(btn => { btn.addEventListener('click', async (e) => { if(confirm("Delete this worker forever?")) { await deleteDoc(doc(db, "workers", e.target.getAttribute('data-id'))); loadWorkersList(); }}); });
-        document.querySelectorAll('.edit-btn').forEach(btn => { btn.addEventListener('click', (e) => { const b = e.target; document.getElementById('formTitle').innerText = "📝 Edit Worker"; document.getElementById('addWorkerBtn').innerText = "Update Profile"; document.getElementById('editWorkerId').value = b.getAttribute('data-id'); document.getElementById('newWorkerName').value = b.getAttribute('data-name'); document.getElementById('newWorkerType').value = b.getAttribute('data-type'); document.getElementById('newWorkerSalary').value = b.getAttribute('data-sal'); document.getElementById('newWorkerExtraRate').value = b.getAttribute('data-ex'); window.scrollTo(0, document.getElementById('formTitle').offsetTop); }); });
+
+        document.querySelectorAll('.del-doc-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                if(confirm("Confirm deletion of file asset registry index row?")) {
+                    await deleteDoc(doc(db, "vault_documents", e.target.getAttribute('data-id')));
+                    loadActiveDocumentsIndex();
+                }
+            });
+        });
     }
 
-    // ORIGINAL EATING COST LOGIC
-    document.getElementById('eatingBtn').addEventListener('click', async () => {
-        const dateVal = document.getElementById('eatingDate').value;
-        const totalAmount = Number(document.getElementById('eatingAmount').value);
-        if(!dateVal || !totalAmount) return alert("Please fill in the Date and Total Amount!");
+    // Processing storage conversions mapping categories safely across database fields
+    document.getElementById('uploadBtn').addEventListener('click', async () => {
+        const name = document.getElementById('docName').value.trim();
+        const categorySelection = docCardTypeSelector.value;
+        const cardNumber = document.getElementById('docNumber').value.trim();
+        const fileSelector = document.getElementById('docFile').files[0];
 
-        const monthVal = dateVal.substring(0, 7); 
-        const workerSnap = await getDocs(collection(db, "workers"));
-        if(workerSnap.empty) return alert("No workers found to split the cost with!");
-        
-        const workerCount = workerSnap.size;
-        const splitAmount = totalAmount / workerCount; 
+        if(!name || !cardNumber || !fileSelector) return alert("All fields must be fully populated!");
 
-        await addDoc(collection(db, "eating_costs"), {
-            date: dateVal, month: monthVal, total_amount: totalAmount, split_amount: splitAmount, worker_count: workerCount
-        });
-
-        alert(`Distributing ₹${totalAmount} across ${workerCount} workers (₹${splitAmount.toFixed(2)} each). Please wait...`);
-        
-        for(let docSnap of workerSnap.docs) {
-            const wName = docSnap.data().name;
-            const attQuery = query(collection(db, "attendance_records"), where("name", "==", wName), where("month", "==", monthVal));
-            const attSnap = await getDocs(attQuery);
-            
-            if(!attSnap.empty) {
-                const attDoc = attSnap.docs[0];
-                const currentEatingExp = Number(attDoc.data().eating_expense || 0);
-                await updateDoc(doc(db, "attendance_records", attDoc.id), { eating_expense: currentEatingExp + splitAmount });
-            } else {
-                await addDoc(collection(db, "attendance_records"), {
-                    name: wName, month: monthVal, working_days: 0, extra_hours: 0, expense: 0, paid: 0, eating_expense: splitAmount 
-                });
-            }
-        }
-        alert("Success! The cost was distributed.");
-        document.getElementById('eatingAmount').value = '';
-    });
-
-    // 🔴 NEW LOGIC: UNDO EATING COST 🔴
-    document.getElementById('loadUndoEatingBtn').addEventListener('click', async () => {
-        const month = document.getElementById('undoEatingMonth').value;
-        if(!month) return alert("Select a month first!");
-        
-        const q = query(collection(db, "eating_costs"), where("month", "==", month));
-        const snap = await getDocs(q);
-        const listDiv = document.getElementById('undoEatingList');
-        listDiv.innerHTML = '';
-        
-        if(snap.empty) {
-            listDiv.innerHTML = '<p style="color:#92400e; font-size:14px;">No eating costs found for this month.</p>';
-            return;
-        }
-
-        snap.forEach(docSnap => {
-            const d = docSnap.data();
-            listDiv.innerHTML += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid #fde68a;">
-                    <span style="font-size:14px; color:#92400e;">📅 ${d.date} - <b>₹${d.total_amount}</b></span>
-                    <button class="btn-red undo-eating-btn" style="width:auto; padding:6px 12px; font-size:12px;" data-id="${docSnap.id}" data-month="${d.month}" data-split="${d.split_amount}">Undo & Refund</button>
-                </div>
-            `;
-        });
-
-        // Attach listener to new Undo buttons
-        document.querySelectorAll('.undo-eating-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                if(!confirm("Are you sure? This will refund this deduction back to ALL workers for this month.")) return;
-                
-                const idToRemove = e.target.getAttribute('data-id');
-                const targetMonth = e.target.getAttribute('data-month');
-                const amountToRefund = Number(e.target.getAttribute('data-split'));
-
-                // 1. Get all attendance records for this month
-                const attQ = query(collection(db, "attendance_records"), where("month", "==", targetMonth));
-                const attSnap = await getDocs(attQ);
-                
-                // 2. Subtract the split amount (refund them)
-                for(let aDoc of attSnap.docs) {
-                    const currentEating = Number(aDoc.data().eating_expense || 0);
-                    // Math.max prevents it from dropping below 0 just in case
-                    const newEating = Math.max(0, currentEating - amountToRefund);
-                    await updateDoc(doc(db, "attendance_records", aDoc.id), { eating_expense: newEating });
-                }
-                
-                // 3. Delete the eating cost log
-                await deleteDoc(doc(db, "eating_costs", idToRemove));
-                
-                alert("Successfully reversed! You can now enter the food cost again for the correct number of workers.");
-                document.getElementById('loadUndoEatingBtn').click(); // Refresh list
-            });
-        });
-    });
-
-    document.getElementById('addWorkerBtn').addEventListener('click', async () => {
-        const id = document.getElementById('editWorkerId').value;
-        const name = document.getElementById('newWorkerName').value.trim();
-        const data = { name: name, type: document.getElementById('newWorkerType').value, daily_salary: Number(document.getElementById('newWorkerSalary').value), extra_hour_rate: Number(document.getElementById('newWorkerExtraRate').value) };
-        if(!name) return alert("Name is required.");
-        if(id) { await updateDoc(doc(db, "workers", id), data); alert("Worker Updated!"); } else { await addDoc(collection(db, "workers"), data); alert("Worker Added!"); }
-        document.getElementById('editWorkerId').value = ''; document.getElementById('newWorkerName').value = ''; document.getElementById('newWorkerSalary').value = ''; document.getElementById('newWorkerExtraRate').value = ''; document.getElementById('formTitle').innerText = "👤 Add New Worker"; document.getElementById('addWorkerBtn').innerText = "Save Worker Profile"; loadWorkersList();
-    });
-
-    document.getElementById('payBtn').addEventListener('click', async () => {
-        const name = document.getElementById('payName').value; const fullDate = document.getElementById('payDate').value; const addAmount = Number(document.getElementById('payAmount').value);
-        if(!name || !fullDate || !addAmount) return alert("Fill all payment fields!");
-        const targetMonth = fullDate.substring(0, 7); 
-        const q = query(collection(db, "attendance_records"), where("name", "==", name), where("month", "==", targetMonth));
-        const snap = await getDocs(q);
-        if(snap.empty) { alert(`Cannot pay! No work record found for ${targetMonth} yet.`); } else { const recordDoc = snap.docs[0]; const currentPaid = Number(recordDoc.data().paid || 0); await updateDoc(doc(db, "attendance_records", recordDoc.id), { paid: currentPaid + addAmount, last_payment_date: fullDate }); alert("Payment recorded!"); document.getElementById('payAmount').value = ''; }
-    });
-
-    document.getElementById('saveDataBtn').addEventListener('click', async () => {
-        const name = document.getElementById('dataName').value;
-        const month = document.getElementById('dataMonth').value;
-        if(!name || !month) return alert("Worker Name and Month required!");
-
-        const q = query(collection(db, "attendance_records"), where("name", "==", name), where("month", "==", month));
-        const snap = await getDocs(q);
-
-        if(!snap.empty) {
-            await updateDoc(doc(db, "attendance_records", snap.docs[0].id), {
-                working_days: Number(document.getElementById('dataDays').value || 0),
-                extra_hours: Number(document.getElementById('dataExtraHrs').value || 0),
-                expense: Number(document.getElementById('dataExpense').value || 0),
-                paid: Number(document.getElementById('dataPaid').value || 0)
-            });
+        // Dynamic naming logic structures
+        let finalCardTypeLabel = "";
+        if(categorySelection === "Aadhar") finalCardTypeLabel = "Aadhar Card";
+        else if(categorySelection === "Voter") finalCardTypeLabel = "Voter ID Card";
+        else if(categorySelection === "Bank") {
+            const bankNameInput = document.getElementById('txtBankSelectorName').value.trim();
+            finalCardTypeLabel = bankNameInput ? `Bank: ${bankNameInput}` : "Bank Account";
         } else {
-            await addDoc(collection(db, "attendance_records"), {
-                name: name, month: month,
-                working_days: Number(document.getElementById('dataDays').value || 0),
-                extra_hours: Number(document.getElementById('dataExtraHrs').value || 0),
-                expense: Number(document.getElementById('dataExpense').value || 0),
-                paid: Number(document.getElementById('dataPaid').value || 0),
-                eating_expense: 0 
-            });
+            const customInputLabel = document.getElementById('txtCustomDocLabel').value.trim();
+            finalCardTypeLabel = customInputLabel ? customInputLabel : "Other Document";
         }
-        alert("Monthly record saved!");
-        document.getElementById('dataDays').value = ''; document.getElementById('dataExtraHrs').value = '0'; document.getElementById('dataExpense').value = '0'; document.getElementById('dataPaid').value = '0';
+
+        const fileReader = new FileReader();
+
+        if (fileSelector.type === "application/pdf") {
+            if (fileSelector.size > 750000) return alert("PDF exceeds 750KB limit payload boundary. Please compress before processing.");
+            
+            fileReader.readAsDataURL(fileSelector);
+            fileReader.onload = async function() {
+                await commitDocumentDataToFirestore(name, categorySelection, finalCardTypeLabel, cardNumber, fileReader.result);
+            };
+        } else {
+            fileReader.readAsDataURL(fileSelector);
+            fileReader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width; canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const qualityFactor = Number(slider.value) / 100;
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', qualityFactor);
+                    
+                    await commitDocumentDataToFirestore(name, categorySelection, finalCardTypeLabel, cardNumber, compressedBase64);
+                };
+            };
+        }
+    });
+
+    async function commitDocumentDataToFirestore(name, structuralCategory, computedLabel, cardNumber, base64TextString) {
+        try {
+            if (base64TextString.length > 1300000) return alert("Payload sizes boundary limit exceeded! Reduce Edit KB slider scale factors.");
+            
+            await addDoc(collection(db, "vault_documents"), {
+                name: name,
+                doc_category: structuralCategory, // Saves base identifier string for exact frontend filter searches
+                card_type: computedLabel,
+                card_number: cardNumber,
+                file_base64: base64TextString
+            });
+            alert("File upload completed successfully!");
+            document.getElementById('docNumber').value = '';
+            document.getElementById('docFile').value = '';
+            document.getElementById('txtBankSelectorName').value = '';
+            document.getElementById('txtCustomDocLabel').value = '';
+            loadActiveDocumentsIndex();
+        } catch(e) { alert("Error writing registry entries: " + e.message); }
+    }
+
+    // 🔴 ONE-CLICK AUTO WEEK EMI DECREMENT WORKFLOW FUNCTIONALITY 🔴
+    document.getElementById('btnQuickEMIDeduct').addEventListener('click', async () => {
+        try {
+            const querySnap = await getDocs(collection(db, "loan_status"));
+            let currentRemainingWeeks = 40;
+            
+            if(!querySnap.empty) {
+                currentRemainingWeeks = Number(querySnap.docs[0].data().remaining_emis) || 0;
+            }
+            
+            if(currentRemainingWeeks <= 0) {
+                return alert("Outstanding EMI totals are already down to zero weeks!");
+            }
+            
+            const decrementedNewTotal = currentRemainingWeeks - 1;
+            await setDoc(doc(db, "loan_status", "active_config"), { remaining_emis: decrementedNewTotal });
+            
+            alert(`EMI payment logged successfully! Outstanding balance reduced from ${currentRemainingWeeks} weeks down to ${decrementedNewTotal} weeks.`);
+        } catch(e) {
+            alert("Error running automatic decrement background update processing: " + e.message);
+        }
+    });
+
+    document.getElementById('updateLoanBtn').addEventListener('click', async () => {
+        const emis = Number(document.getElementById('txtAdminEmis').value);
+        if(!emis && emis !== 0) return alert("Please specify a manual numeric entry value override target!");
+
+        try {
+            await setDoc(doc(db, "loan_status", "active_config"), { remaining_emis: emis });
+            alert("Roster loan metrics count configuration values overwritten successfully!");
+            document.getElementById('txtAdminEmis').value = '';
+        } catch(e) { alert("Error executing database modifications: " + e.message); }
     });
 </script>
 </body>
